@@ -177,7 +177,32 @@ cp .env.example .env
 
 ### Configuration
 
-Edit `.env` with your credentials:
+**🔐 RECOMMENDED: Secure Credential Storage (v1.0.2+)**
+
+InstaBridge now supports system keychain for secure password storage:
+
+```bash
+# Install keyring for secure storage
+pip install keyring
+
+# Run interactive setup wizard
+python -m src.credentials
+
+# Passwords stored encrypted in:
+# - macOS: Keychain Access
+# - Linux: libsecret/gnome-keyring
+# - Windows: Credential Manager
+```
+
+**Benefits:**
+- ✅ Passwords encrypted by OS (never in plain text)
+- ✅ No `.env` file with passwords
+- ✅ Protected by system authentication
+- ✅ Set once, use forever
+
+**Alternative: Manual .env setup** (less secure)
+
+If you prefer not to use keychain, edit `.env`:
 
 ```bash
 # Instagram credentials (use throwaway account!)
@@ -195,6 +220,8 @@ WA_REPORT_PHONE=
 # Optional: Custom message prefix
 MESSAGE_PREFIX=New from Instagram:
 ```
+
+📖 **See [Keychain Setup Guide](docs/KEYCHAIN_SETUP.md) for detailed instructions**
 
 **💡 Pro Tip:** Use `WA_CONTENT_PHONE` (international format) instead of contact name for 10x more reliability.
 
@@ -504,6 +531,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 | Document | Description |
 |----------|-------------|
+| [KEYCHAIN_SETUP.md](docs/KEYCHAIN_SETUP.md) | **🔐 Secure password storage (RECOMMENDED)** |
 | [SAFE_USAGE_GUIDE.md](docs/SAFE_USAGE_GUIDE.md) | **⚠️ Minimize account ban risk** |
 | [SECURITY_BEST_PRACTICES.md](docs/SECURITY_BEST_PRACTICES.md) | Security guidelines & credential safety |
 | [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Design decisions & system overview |

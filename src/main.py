@@ -11,6 +11,13 @@ from src.state import load_state, save_state
 from src.settings import RecipientSettings, load_settings
 from src.wa import WhatsAppSender
 
+# Try to load credentials from keychain first, fall back to .env
+try:
+    from src.credentials import load_credentials_safely
+    USE_KEYCHAIN = True
+except ImportError:
+    USE_KEYCHAIN = False
+
 
 @dataclass(frozen=True)
 class Config:
@@ -24,6 +31,33 @@ class Config:
 
 
 def load_config() -> Config:
+    """Load configuration from keychain (preferred) or .env file (fallback).
+    
+    Priority:
+    1. System keychain (if keyring installed and credentials stored)
+    2. Environment variables / .env file
+    
+    For setup, run: python -m src.credentials
+    """
+    # Try keychain first
+    if USE_KEYCHAIN:
+        try:
+            creds = load_credentials_safely()
+            print("🔐 Loaded credentials from system keychain")
+            return Config(
+                ig_username=creds["IG_USERNAME"],
+                ig_password=creds["IG_PASSWORD"],
+                wa_content_contact_name=creds["WA_CONTENT_CONTACT_NAME"],
+                wa_content_phone=creds["WA_CONTENT_PHONE"],
+                wa_report_contact_name=creds["WA_REPORT_CONTACT_NAME"],
+                wa_report_phone=creds["WA_REPORT_PHONE"],
+                message_prefix=creds["MESSAGE_PREFIX"],
+            )
+        except Exception as e:
+            print(f"⚠️  Could not load from keychain: {e}")
+            print("   Falling back to .env file...")
+    
+    # Fall back to .env
     load_dotenv()
     ig_username = os.getenv("IG_USERNAME", "").strip()
     ig_password = os.getenv("IG_PASSWORD", "").strip()
@@ -57,8 +91,12 @@ def load_config() -> Config:
         missing.append("WA_CONTENT_CONTACT_NAME (or legacy WA_CONTACT_NAME)")
     if missing:
         raise SystemExit(
-            "Missing required env vars in .env: " + ", ".join(missing) + "\n"
-            "Copy .env.example to .env and fill values."
+            "Missing required credentials.\n\n"
+            "Option 1 (Secure): Use system keychain\n"
+            "  python -m src.credentials\n\n"
+            "Option 2 (Less secure): Use .env file\n"
+            "  Copy .env.example to .env and fill values.\n\n"
+            f"Missing: {', '.join(missing)}"
         )
 
     return Config(
