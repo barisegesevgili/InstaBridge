@@ -1,15 +1,15 @@
 # Development dependencies
 -r requirements.txt
 
-# Testing
-pytest>=7.4.0
-pytest-cov>=4.1.0
-pytest-mock>=3.11.1
+# Testing (with safe version ranges)
+pytest~=8.3.0
+pytest-cov~=6.0.0
+pytest-mock~=3.14.0
 
 # Code quality
-black>=23.7.0
-ruff>=0.0.282
-mypy>=1.5.0
+black~=24.10.0
+ruff~=0.8.0
+mypy~=1.13.0
 
 # Type stubs
-types-requests>=2.31.0
+types-requests~=2.31.0

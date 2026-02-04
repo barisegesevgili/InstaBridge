@@ -134,9 +134,12 @@ def resend_last(*, cfg: Config, max_files: int = 0) -> None:
     print("Done: re-sent last batch (state unchanged).")
 
 
-def run_once(*, cfg: Config, force_resend_current: bool = False) -> None:
+def run_once(*, cfg: Config, force_resend_current: bool = False, dry_run: bool = False) -> None:
     media_dir = Path("media")
     media_dir.mkdir(exist_ok=True)
+
+    if dry_run:
+        print("🔍 DRY RUN MODE: No actual messages will be sent")
 
     state = load_state()
     settings = load_settings(
@@ -149,10 +152,14 @@ def run_once(*, cfg: Config, force_resend_current: bool = False) -> None:
     ig.login(cfg.ig_username, cfg.ig_password)
     print("Instagram login OK.")
 
-    wa = WhatsAppSender(profile_dir=Path("wa_profile"))
-    print("Opening WhatsApp Web (scan QR if asked)...")
-    wa.start()
-    print("WhatsApp Web ready.")
+    wa = None
+    if not dry_run:
+        wa = WhatsAppSender(profile_dir=Path("wa_profile"))
+        print("Opening WhatsApp Web (scan QR if asked)...")
+        wa.start()
+        print("WhatsApp Web ready.")
+    else:
+        print("📵 Dry run: Skipping WhatsApp Web connection")
 
     recipients = [
         r
@@ -160,7 +167,8 @@ def run_once(*, cfg: Config, force_resend_current: bool = False) -> None:
         if r.enabled and (r.wa_contact_name or r.wa_phone)
     ]
     if not recipients:
-        wa.stop()
+        if wa:
+            wa.stop()
         print("Done: no enabled recipients configured in settings.json.")
         state.last_run_ts = time.time()
         save_state(state)
@@ -180,7 +188,8 @@ def run_once(*, cfg: Config, force_resend_current: bool = False) -> None:
     items = [it for it in items if (it.created_ts or 0.0) >= cutoff_ts]
 
     if not items:
-        wa.stop()
+        if wa:
+            wa.stop()
         print("Done: nothing new to send.")
         state.last_run_ts = time.time()
         save_state(state)
@@ -202,7 +211,8 @@ def run_once(*, cfg: Config, force_resend_current: bool = False) -> None:
             items_by_recipient[rid] = selected
 
     if not items_by_recipient:
-        wa.stop()
+        if wa:
+            wa.stop()
         print("Done: nothing new to send (after filtering/dedupe).")
         state.last_run_ts = time.time()
         save_state(state)
@@ -226,9 +236,23 @@ def run_once(*, cfg: Config, force_resend_current: bool = False) -> None:
         to_send = items_by_recipient.get(rid, [])
         if not to_send:
             continue
-        print(f"Sending to {r.display_name} ({len(to_send)} item(s))...")
-        # Open chat once for this recipient (best-effort).
-        wa.open_chat(contact_name=r.wa_contact_name or r.display_name, phone=r.wa_phone)
+        print(f"{'[DRY RUN] Would send' if dry_run else 'Sending'} to {r.display_name} ({len(to_send)} item(s))...")
+        
+        if dry_run:
+            # Simulate sending without actual WhatsApp interaction
+            for it in to_send:
+                paths = downloaded.get(it.unique_id) or []
+                if not paths:
+                    continue
+                caption = _format_run_caption(cfg.message_prefix, [it])
+                print(f"  📋 Would send {len(paths)} file(s) for {it.unique_id}")
+                print(f"     Caption: {caption[:100]}..." if len(caption) > 100 else f"     Caption: {caption}")
+            # Don't update state in dry-run mode
+            continue
+        
+        # Real sending (non-dry-run)
+        if wa:
+            wa.open_chat(contact_name=r.wa_contact_name or r.display_name, phone=r.wa_phone)
         sent_set = state.sent_ids_by_recipient.setdefault(rid, set())
         for it in to_send:
             paths = downloaded.get(it.unique_id) or []
@@ -236,25 +260,30 @@ def run_once(*, cfg: Config, force_resend_current: bool = False) -> None:
                 continue
             caption = _format_run_caption(cfg.message_prefix, [it])
             print(f"Sending {len(paths)} file(s) for {it.unique_id}...")
-            wa.send_media_batch(
-                r.wa_contact_name or r.display_name,
-                paths,
-                phone=r.wa_phone,
-                caption=caption,
-            )
+            if wa:
+                wa.send_media_batch(
+                    r.wa_contact_name or r.display_name,
+                    paths,
+                    phone=r.wa_phone,
+                    caption=caption,
+                )
             sent_set.add(it.unique_id)
             state.sent_ids.add(it.unique_id)  # legacy/global dedupe
             save_state(state)
 
-    wa.stop()
+    if wa:
+        wa.stop()
 
-    state.last_run_ts = time.time()
-    state.last_run_files = [str(p) for p in run_files]
-    # Save a generic caption for the run (using the union of items).
-    union_items = list(unique_needed.values())
-    state.last_run_caption = _format_run_caption(cfg.message_prefix, union_items)
-    save_state(state)
-    print("Done: sent new items (no duplicates).")
+    if not dry_run:
+        state.last_run_ts = time.time()
+        state.last_run_files = [str(p) for p in run_files]
+        # Save a generic caption for the run (using the union of items).
+        union_items = list(unique_needed.values())
+        state.last_run_caption = _format_run_caption(cfg.message_prefix, union_items)
+        save_state(state)
+        print("Done: sent new items (no duplicates).")
+    else:
+        print("✅ Dry run complete: No messages sent, no state updated")
 
 
 def main() -> None:
@@ -276,13 +305,18 @@ def main() -> None:
         action="store_true",
         help="Ignore dedupe for current IG items (test mode).",
     )
+    ap.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Simulate run without sending messages or updating state.",
+    )
     args = ap.parse_args()
 
     if args.resend_last:
         resend_last(cfg=cfg, max_files=int(args.max_files or 0))
         return
 
-    run_once(cfg=cfg, force_resend_current=bool(args.force))
+    run_once(cfg=cfg, force_resend_current=bool(args.force), dry_run=bool(args.dry_run))
 
 
 if __name__ == "__main__":

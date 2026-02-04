@@ -1,0 +1,213 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>InstaBridge — Settings</title>
+    <style>
+      body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; margin: 24px; }
+      .card { max-width: 920px; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; }
+      button { padding: 10px 12px; border-radius: 10px; border: 1px solid #111827; background: #111827; color: white; cursor: pointer; }
+      button.secondary { background: white; color: #111827; }
+      button:disabled { opacity: 0.6; cursor: not-allowed; }
+      .muted { color: #6b7280; font-size: 14px; }
+      .row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 12px; align-items: center; }
+      label { font-size: 13px; color: #374151; display: flex; flex-direction: column; gap: 6px; }
+      input, select { padding: 8px 10px; border-radius: 10px; border: 1px solid #d1d5db; min-width: 160px; }
+      table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+      th, td { border-bottom: 1px solid #e5e7eb; padding: 8px; font-size: 13px; vertical-align: top; }
+      th { text-align: left; color: #374151; }
+      .chk { display: inline-flex; gap: 8px; align-items: center; }
+      .err { color: #b91c1c; white-space: pre-wrap; }
+      code { background: #f3f4f6; padding: 2px 6px; border-radius: 6px; }
+      a { color: #0f766e; text-decoration: none; }
+      a:hover { text-decoration: underline; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="row" style="justify-content: space-between; align-items: center; margin-top: 0;">
+        <div class="muted"><a href="/">Reports</a></div>
+        <div class="muted"><b>Settings</b></div>
+      </div>
+
+      <h2>Content sharing settings</h2>
+      <p class="muted">
+        This page edits <code>settings.json</code>. Your scheduler reads it automatically.
+      </p>
+
+      <h3>Schedule</h3>
+      <div class="row">
+        <label class="chk"><input id="schedEnabled" type="checkbox" /> enable scheduler</label>
+        <label>Timezone
+          <input id="schedTz" type="text" value="Europe/Berlin" />
+        </label>
+        <label>Daily time
+          <input id="schedTime" type="time" value="19:00" />
+        </label>
+        <div class="muted" id="nextRun"></div>
+      </div>
+
+      <h3>Friends (WhatsApp recipients)</h3>
+      <p class="muted">
+        Tip: <b>Phone</b> is most reliable (WhatsApp Web deep link). Use international format digits only.
+      </p>
+
+      <div class="row">
+        <button class="secondary" onclick="addRecipient()">Add friend</button>
+        <button onclick="save()">Save</button>
+        <div id="status" class="muted"></div>
+        <div id="error" class="err"></div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Enabled</th>
+            <th>Display name</th>
+            <th>WhatsApp contact name (optional)</th>
+            <th>Phone (recommended)</th>
+            <th>Share posts</th>
+            <th>Share stories</th>
+            <th>Close friends stories</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="recTable"></tbody>
+      </table>
+    </div>
+
+    <script>
+      let settings = null;
+
+      function uid() {
+        if (crypto && crypto.randomUUID) return crypto.randomUUID();
+        return 'id_' + Math.random().toString(16).slice(2);
+      }
+
+      function render() {
+        document.getElementById('error').textContent = '';
+        document.getElementById('status').textContent = '';
+        document.getElementById('schedEnabled').checked = !!(settings.schedule && settings.schedule.enabled);
+        document.getElementById('schedTz').value = (settings.schedule && settings.schedule.tz) || 'Europe/Berlin';
+        document.getElementById('schedTime').value = (settings.schedule && settings.schedule.time_hhmm) || '19:00';
+
+        const tbody = document.getElementById('recTable');
+        tbody.innerHTML = '';
+        for (const r of (settings.recipients || [])) {
+          const tr = document.createElement('tr');
+          tr.dataset.id = r.id;
+          tr.innerHTML = `
+            <td><input type="checkbox" class="r_enabled" ${r.enabled ? 'checked' : ''} /></td>
+            <td><input type="text" class="r_display_name" value="${(r.display_name||'').replaceAll('"','&quot;')}" /></td>
+            <td><input type="text" class="r_wa_contact_name" value="${(r.wa_contact_name||'').replaceAll('"','&quot;')}" /></td>
+            <td><input type="text" class="r_wa_phone" value="${(r.wa_phone||'').replaceAll('"','&quot;')}" placeholder="e.g. 491701234567" /></td>
+            <td><input type="checkbox" class="r_send_posts" ${r.send_posts ? 'checked' : ''} /></td>
+            <td><input type="checkbox" class="r_send_stories" ${r.send_stories ? 'checked' : ''} /></td>
+            <td><input type="checkbox" class="r_send_close" ${r.send_close_friends_stories ? 'checked' : ''} /></td>
+            <td><button class="secondary" onclick="removeRecipient('${r.id}')">Remove</button></td>
+          `;
+          tbody.appendChild(tr);
+        }
+      }
+
+      function addRecipient() {
+        settings.recipients = settings.recipients || [];
+        settings.recipients.push({
+          id: uid(),
+          display_name: 'Friend',
+          wa_contact_name: '',
+          wa_phone: '',
+          enabled: true,
+          send_posts: true,
+          send_stories: true,
+          send_close_friends_stories: false
+        });
+        render();
+      }
+
+      function removeRecipient(id) {
+        settings.recipients = (settings.recipients || []).filter(r => r.id !== id);
+        render();
+      }
+
+      function collectFromUI() {
+        settings.schedule = settings.schedule || {};
+        settings.schedule.enabled = document.getElementById('schedEnabled').checked;
+        settings.schedule.tz = document.getElementById('schedTz').value;
+        settings.schedule.time_hhmm = document.getElementById('schedTime').value;
+
+        const rows = document.querySelectorAll('#recTable tr');
+        const out = [];
+        for (const tr of rows) {
+          const id = tr.dataset.id;
+          out.push({
+            id,
+            display_name: tr.querySelector('.r_display_name').value,
+            wa_contact_name: tr.querySelector('.r_wa_contact_name').value,
+            wa_phone: tr.querySelector('.r_wa_phone').value,
+            enabled: tr.querySelector('.r_enabled').checked,
+            send_posts: tr.querySelector('.r_send_posts').checked,
+            send_stories: tr.querySelector('.r_send_stories').checked,
+            send_close_friends_stories: tr.querySelector('.r_send_close').checked
+          });
+        }
+        settings.recipients = out;
+      }
+
+      async function refreshNextRun() {
+        const el = document.getElementById('nextRun');
+        try {
+          const res = await fetch('/api/scheduler/next-run');
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'failed');
+          el.textContent = data.enabled ? (`Next run: ${data.next_run}`) : 'Scheduler disabled';
+        } catch (e) {
+          el.textContent = '';
+        }
+      }
+
+      async function save() {
+        const status = document.getElementById('status');
+        const error = document.getElementById('error');
+        error.textContent = '';
+        status.textContent = 'Saving…';
+        try {
+          collectFromUI();
+          const res = await fetch('/api/settings', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(settings)
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Save failed');
+          settings = data.settings;
+          status.textContent = 'Saved.';
+          render();
+          await refreshNextRun();
+        } catch (e) {
+          status.textContent = '';
+          error.textContent = String(e);
+        }
+      }
+
+      async function init() {
+        const status = document.getElementById('status');
+        status.textContent = 'Loading…';
+        const res = await fetch('/api/settings');
+        const data = await res.json();
+        if (!res.ok) {
+          status.textContent = '';
+          document.getElementById('error').textContent = data.error || 'Failed to load settings';
+          return;
+        }
+        settings = data.settings;
+        status.textContent = '';
+        render();
+        await refreshNextRun();
+      }
+
+      init();
+    </script>
+  </body>
+</html>

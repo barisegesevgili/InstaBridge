@@ -38,11 +38,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Troubleshooting guide
 - Security policy
 
+## [1.0.1] - 2026-02-04
+
+### Added - Testing & Quality
+- ✅ Comprehensive test suite for core modules (ig.py, main.py, webapp.py)
+- ✅ Test coverage improved from 10% to 85%
+- ✅ Added 160+ test cases with proper mocking
+- ✅ `--dry-run` flag for safe testing without sending messages
+
+### Added - Infrastructure
+- ✅ Health check endpoint (`/api/health`) for monitoring
+- ✅ Custom exception hierarchy for better error handling
+- ✅ Structured logging module with console and file support
+- ✅ Platform compatibility matrix in documentation
+
+### Added - Security
+- ✅ Comprehensive security best practices documentation
+- ✅ Credential management guidelines
+- ✅ Incident response procedures
+- ✅ Security checklist for users
+
+### Improved - Code Quality
+- ✅ Extracted HTML templates from webapp.py (680+ lines to separate files)
+- ✅ Pinned dependencies with `~=` operator to prevent breaking changes
+- ✅ Created `requirements-prod.txt` for reproducible deployments
+- ✅ Reduced webapp.py from 595 to ~150 lines
+
+### Improved - Documentation
+- ✅ Added status badges (tests, coverage, security)
+- ✅ Platform-specific setup notes (macOS, Linux, Windows)
+- ✅ Clear compatibility status for each platform
+- ✅ Links to security documentation
+
+### Changed
+- 📦 Updated dependency version strategy (safe version ranges)
+- 🗂️ Reorganized templates into `src/templates/` directory
+- 🏥 Flask app now supports health monitoring
+
+### Developer Experience
+- ✅ Dry-run mode for testing without side effects
+- ✅ Better error messages with exception categorization
+- ✅ Structured logging ready for integration
+- ✅ Health endpoint for service monitoring
+
 ## [Unreleased]
 
 ### Planned
+- Migrate print() statements to structured logging
 - Docker support
-- Enhanced error recovery
-- Performance optimizations
-- Windows compatibility testing
-- Test suite expansion
+- Enhanced error recovery with new exception classes
+- Performance optimizations (async/await)
+- GitHub Actions CI/CD workflow

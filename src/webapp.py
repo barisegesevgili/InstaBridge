@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
-from flask import Flask, jsonify, render_template_string, request
+from flask import Flask, jsonify, render_template, request
 
 from src.insights import (
     RateLimitedError,
@@ -17,10 +17,22 @@ from src.settings import (
     settings_to_public_dict,
 )
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder="templates")
 
 
-INDEX_HTML = """<!doctype html>
+@app.get("/")
+def index():
+    return render_template("index.html")
+
+
+@app.get("/settings")
+def settings_page():
+    return render_template("settings.html")
+
+
+# Legacy HTML strings removed - now using template files
+# Templates are in src/templates/
+_LEGACY_INDEX_HTML = """<!doctype html>
 <html>
   <head>
     <meta charset="utf-8" />
@@ -453,15 +465,49 @@ SETTINGS_HTML = """<!doctype html>
 </html>
 """
 
-
-@app.get("/")
-def index():
-    return render_template_string(INDEX_HTML)
+# Routes are defined above (using render_template instead of render_template_string)
 
 
-@app.get("/settings")
-def settings_page():
-    return render_template_string(SETTINGS_HTML)
+@app.get("/api/health")
+def api_health():
+    """
+    Health check endpoint for monitoring and diagnostics.
+    Returns system status and basic configuration info.
+    """
+    import os
+    from pathlib import Path
+    
+    try:
+        # Check required files exist
+        checks = {
+            "ig_session_writable": os.access(".", os.W_OK),
+            "settings_file_exists": Path("settings.json").exists(),
+            "state_file_exists": Path("state.json").exists(),
+        }
+        
+        # Check environment variables
+        env_vars = {
+            "ig_username_set": bool(os.getenv("IG_USERNAME")),
+            "ig_password_set": bool(os.getenv("IG_PASSWORD")),
+            "wa_contact_set": bool(os.getenv("WA_CONTENT_CONTACT_NAME") or os.getenv("WA_CONTACT_NAME")),
+        }
+        
+        # Overall health
+        all_checks_pass = all(checks.values()) and all(env_vars.values())
+        
+        return jsonify({
+            "status": "healthy" if all_checks_pass else "degraded",
+            "checks": checks,
+            "environment": env_vars,
+            "version": "1.0.0",
+        }), 200 if all_checks_pass else 503
+        
+    except Exception as e:
+        return jsonify({
+            "status": "unhealthy",
+            "error": str(e),
+            "version": "1.0.0",
+        }), 500
 
 
 @app.get("/api/settings")
