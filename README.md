@@ -21,16 +21,18 @@
 
 | Risk | Impact |
 |------|--------|
-| 🚫 **Account Bans** | Permanent loss of Instagram/WhatsApp accounts |
+| 🚫 **Account Bans** | Possible permanent loss of accounts (risk varies by use case) |
 | ⏸️ **Rate Limits** | Temporary restrictions on API access |
 | 🔒 **Account Locks** | Verification challenges and login issues |
 | ⚖️ **Legal Risk** | Potential ToS violation consequences |
 
-**🛡️ Safety Recommendations:**
-- ✅ Use only with throwaway/test accounts
-- ✅ This is for learning browser automation
+**Risk by use case:** For the **intended use** (downloading your own stories/content, ~once per day, no social manipulation), risk is **lower**: instagrapi is LOW→MEDIUM; Playwright is VERY LOW when used with a normal browser profile. See [Risk by use case](docs/RISK_BY_USE_CASE.md).
+
+**🛡️ Safety recommendations:**
+- ✅ Prefer throwaway/test accounts; primary accounts are an informed choice
+- ✅ This is for learning and personal automation
 - ✅ Not for commercial or production use
-- ❌ Do not use with your primary accounts
+- ❌ Do not use for growth automation, spam, or scraping others
 
 ---
 
@@ -532,6 +534,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 | Document | Description |
 |----------|-------------|
 | [KEYCHAIN_SETUP.md](docs/KEYCHAIN_SETUP.md) | **🔐 Secure password storage (RECOMMENDED)** |
+| [RISK_BY_USE_CASE.md](docs/RISK_BY_USE_CASE.md) | **📋 Risk by use case** (instagrapi vs Playwright, intended use) |
 | [SAFE_USAGE_GUIDE.md](docs/SAFE_USAGE_GUIDE.md) | **⚠️ Minimize account ban risk** |
 | [SECURITY_BEST_PRACTICES.md](docs/SECURITY_BEST_PRACTICES.md) | Security guidelines & credential safety |
 | [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Design decisions & system overview |

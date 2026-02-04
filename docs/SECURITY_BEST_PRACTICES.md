@@ -5,9 +5,9 @@
 ## ⚠️ Critical Warnings
 
 ### Account Safety
-- ✅ **ONLY use throwaway accounts** - Never use your primary Instagram or WhatsApp accounts
-- ✅ **Expect bans** - This tool violates Terms of Service
-- ✅ **Educational purpose only** - Not for production or commercial use
+- ✅ **Prefer throwaway accounts** - Risk varies by use case; see [Risk by use case](RISK_BY_USE_CASE.md). For own-content, low-frequency use, risk is lower.
+- ✅ **ToS violation** - This tool uses unofficial APIs; restrictions or bans are possible
+- ✅ **Educational / personal use** - Not for production or commercial use
 - ❌ **No warranties** - Use at your own risk
 
 ### Legal & Ethical

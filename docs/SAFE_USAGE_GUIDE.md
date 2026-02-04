@@ -4,10 +4,23 @@
 
 ---
 
+## 📋 **Risk by Use Case**
+
+Risk depends strongly on *how* you use the tool:
+
+| Use case | instagrapi risk | Playwright risk |
+|----------|------------------|------------------|
+| **Intended: own content, ~1×/day** | **LOW → MEDIUM** | **VERY LOW** (if headed, persistent profile, normal IP) |
+| Growth automation, spam, scraping others | High | Higher |
+
+For **personal archival** of your own stories at low frequency (e.g. once per day), with no likes/follows/DMs, risk is **substantially lower** than for automation that touches other users or runs often. See [Risk by use case](RISK_BY_USE_CASE.md) for the full research summary.
+
+---
+
 ## ⚠️ **Critical: Understand the Risks**
 
 ### **What Can Happen:**
-- 🚫 **Permanent account ban** - Most serious consequence
+- 🚫 **Permanent account ban** - Most serious consequence (less likely at low frequency, own content only)
 - ⏸️ **Temporary restrictions** - Rate limiting, feature blocks
 - 🔒 **Account locks** - Verification challenges required
 - ⚖️ **IP-level blocks** - Affects all accounts from your IP

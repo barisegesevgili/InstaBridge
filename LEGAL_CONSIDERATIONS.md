@@ -11,7 +11,7 @@
 **Is InstaBridge illegal?** No.  
 **Can you be sued?** Extremely unlikely.  
 **Should you keep it private?** No - public is safer and more valuable.  
-**Are users at risk?** Yes - account bans are likely.
+**Are users at risk?** Risk varies by use case. For the intended use (own content, ~1×/day), account risk is lower; bans are still possible. See [Risk by use case](docs/RISK_BY_USE_CASE.md).
 
 ---
 

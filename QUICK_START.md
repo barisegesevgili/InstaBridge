@@ -6,7 +6,7 @@ Get InstaBridge running in 5 minutes.
 
 ## ⚠️ Important First
 
-**This tool violates Instagram/WhatsApp ToS. Use throwaway accounts only!**
+**This tool uses unofficial APIs (ToS violation). Risk is lower for personal archival at low frequency; see [Risk by use case](docs/RISK_BY_USE_CASE.md). Prefer throwaway accounts until you're comfortable.**
 
 ## Step 1: Setup (2 minutes)
 
