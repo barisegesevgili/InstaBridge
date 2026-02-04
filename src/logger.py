@@ -16,28 +16,28 @@ def setup_logger(
     format_json: bool = False,
 ) -> logging.Logger:
     """Set up and configure logger.
-    
+
     Args:
         name: Logger name
         level: Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
         log_file: Optional file path for logging to file
         format_json: If True, use JSON formatting (for production)
-    
+
     Returns:
         Configured logger instance
     """
     logger = logging.getLogger(name)
-    
+
     # Avoid adding handlers multiple times
     if logger.handlers:
         return logger
-    
+
     logger.setLevel(level)
-    
+
     # Console handler with color support
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setLevel(level)
-    
+
     if format_json:
         # JSON format for production/parsing
         console_formatter = logging.Formatter(
@@ -49,34 +49,34 @@ def setup_logger(
             "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s",
             datefmt="%Y-%m-%d %H:%M:%S",
         )
-    
+
     console_handler.setFormatter(console_formatter)
     logger.addHandler(console_handler)
-    
+
     # Optional file handler
     if log_file:
         log_file.parent.mkdir(parents=True, exist_ok=True)
         file_handler = logging.FileHandler(log_file)
         file_handler.setLevel(level)
-        
+
         # Always use detailed format for files
         file_formatter = logging.Formatter(
             "%(asctime)s | %(levelname)-8s | %(name)s.%(module)s:%(lineno)d | %(message)s"
         )
         file_handler.setFormatter(file_formatter)
         logger.addHandler(file_handler)
-    
+
     return logger
 
 
 def get_logger(name: str = "instabridge") -> logging.Logger:
     """Get logger instance.
-    
+
     If logger doesn't exist, creates it with default settings.
-    
+
     Args:
         name: Logger name (typically module name)
-    
+
     Returns:
         Logger instance
     """

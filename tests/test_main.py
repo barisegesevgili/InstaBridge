@@ -324,7 +324,9 @@ class TestResendLast:
 
     @patch("src.main.load_state")
     @patch("src.main.WhatsAppSender")
-    def test_resend_last_with_files(self, mock_wa_class, mock_load_state, tmp_path, monkeypatch):
+    def test_resend_last_with_files(
+        self, mock_wa_class, mock_load_state, tmp_path, monkeypatch
+    ):
         """Test resending last batch when files exist."""
         # Set up environment
         monkeypatch.setenv("IG_USERNAME", "test")
@@ -355,7 +357,9 @@ class TestResendLast:
 
     @patch("src.main.load_state")
     @patch("src.main.WhatsAppSender")
-    def test_resend_last_no_files(self, mock_wa_class, mock_load_state, monkeypatch, capsys):
+    def test_resend_last_no_files(
+        self, mock_wa_class, mock_load_state, monkeypatch, capsys
+    ):
         """Test resending when no files available."""
         monkeypatch.setenv("IG_USERNAME", "test")
         monkeypatch.setenv("IG_PASSWORD", "test")
@@ -382,7 +386,13 @@ class TestRunOnce:
     @patch("src.main.IgClient")
     @patch("src.main.WhatsAppSender")
     def test_run_once_no_recipients(
-        self, mock_wa_class, mock_ig_class, mock_save_state, mock_load_settings, mock_load_state, monkeypatch
+        self,
+        mock_wa_class,
+        mock_ig_class,
+        mock_save_state,
+        mock_load_settings,
+        mock_load_state,
+        monkeypatch,
     ):
         """Test run_once exits early when no enabled recipients."""
         monkeypatch.setenv("IG_USERNAME", "test")
@@ -424,7 +434,13 @@ class TestRunOnce:
     @patch("src.main.IgClient")
     @patch("src.main.WhatsAppSender")
     def test_run_once_no_new_items(
-        self, mock_wa_class, mock_ig_class, mock_save_state, mock_load_settings, mock_load_state, monkeypatch
+        self,
+        mock_wa_class,
+        mock_ig_class,
+        mock_save_state,
+        mock_load_settings,
+        mock_load_state,
+        monkeypatch,
     ):
         """Test run_once when no new content available."""
         monkeypatch.setenv("IG_USERNAME", "test")

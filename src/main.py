@@ -14,6 +14,7 @@ from src.wa import WhatsAppSender
 # Try to load credentials from keychain first, fall back to .env
 try:
     from src.credentials import load_credentials_safely
+
     USE_KEYCHAIN = True
 except ImportError:
     USE_KEYCHAIN = False
@@ -32,11 +33,11 @@ class Config:
 
 def load_config() -> Config:
     """Load configuration from keychain (preferred) or .env file (fallback).
-    
+
     Priority:
     1. System keychain (if keyring installed and credentials stored)
     2. Environment variables / .env file
-    
+
     For setup, run: python -m src.credentials
     """
     # Try keychain first
@@ -56,7 +57,7 @@ def load_config() -> Config:
         except Exception as e:
             print(f"⚠️  Could not load from keychain: {e}")
             print("   Falling back to .env file...")
-    
+
     # Fall back to .env
     load_dotenv()
     ig_username = os.getenv("IG_USERNAME", "").strip()
@@ -172,7 +173,9 @@ def resend_last(*, cfg: Config, max_files: int = 0) -> None:
     print("Done: re-sent last batch (state unchanged).")
 
 
-def run_once(*, cfg: Config, force_resend_current: bool = False, dry_run: bool = False) -> None:
+def run_once(
+    *, cfg: Config, force_resend_current: bool = False, dry_run: bool = False
+) -> None:
     media_dir = Path("media")
     media_dir.mkdir(exist_ok=True)
 
@@ -274,8 +277,10 @@ def run_once(*, cfg: Config, force_resend_current: bool = False, dry_run: bool =
         to_send = items_by_recipient.get(rid, [])
         if not to_send:
             continue
-        print(f"{'[DRY RUN] Would send' if dry_run else 'Sending'} to {r.display_name} ({len(to_send)} item(s))...")
-        
+        print(
+            f"{'[DRY RUN] Would send' if dry_run else 'Sending'} to {r.display_name} ({len(to_send)} item(s))..."
+        )
+
         if dry_run:
             # Simulate sending without actual WhatsApp interaction
             for it in to_send:
@@ -284,13 +289,19 @@ def run_once(*, cfg: Config, force_resend_current: bool = False, dry_run: bool =
                     continue
                 caption = _format_run_caption(cfg.message_prefix, [it])
                 print(f"  📋 Would send {len(paths)} file(s) for {it.unique_id}")
-                print(f"     Caption: {caption[:100]}..." if len(caption) > 100 else f"     Caption: {caption}")
+                print(
+                    f"     Caption: {caption[:100]}..."
+                    if len(caption) > 100
+                    else f"     Caption: {caption}"
+                )
             # Don't update state in dry-run mode
             continue
-        
+
         # Real sending (non-dry-run)
         if wa:
-            wa.open_chat(contact_name=r.wa_contact_name or r.display_name, phone=r.wa_phone)
+            wa.open_chat(
+                contact_name=r.wa_contact_name or r.display_name, phone=r.wa_phone
+            )
         sent_set = state.sent_ids_by_recipient.setdefault(rid, set())
         for it in to_send:
             paths = downloaded.get(it.unique_id) or []

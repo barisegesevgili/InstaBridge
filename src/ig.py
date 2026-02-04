@@ -24,10 +24,10 @@ class IgItem:
     def download(self, dest_dir: Path) -> list[Path]:
         """Download media with small human-like delay between files."""
         dest_dir.mkdir(exist_ok=True)
-        
+
         # Small delay to appear more human-like
         human_like_delay(0.5, 1.5)
-        
+
         if self.kind == "post":
             info = self._client.media_info(self._media_pk)
             media_type = getattr(info, "media_type", None)  # 1=photo,2=video,8=album
@@ -59,7 +59,9 @@ class IgItem:
 
 
 class IgClient:
-    def __init__(self, *, session_path: Path, enable_rate_limiting: bool = True) -> None:
+    def __init__(
+        self, *, session_path: Path, enable_rate_limiting: bool = True
+    ) -> None:
         self._cl = Client()
         self._session_path = session_path
         self._enable_rate_limiting = enable_rate_limiting
@@ -166,7 +168,7 @@ class IgClient:
         """Fetch latest post with rate limiting."""
         if self._enable_rate_limiting:
             self._rate_limiter.wait()
-        
+
         user_id = self._cl.user_id
         if not user_id:
             return []
@@ -211,7 +213,7 @@ class IgClient:
         """
         if self._enable_rate_limiting:
             self._rate_limiter.wait()
-        
+
         user_id = self._cl.user_id
         if not user_id:
             return []
@@ -247,7 +249,7 @@ class IgClient:
         """Fetch active stories with rate limiting."""
         if self._enable_rate_limiting:
             self._rate_limiter.wait()
-        
+
         user_id = self._cl.user_id
         if not user_id:
             return []

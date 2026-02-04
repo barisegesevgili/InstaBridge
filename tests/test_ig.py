@@ -59,9 +59,9 @@ class TestIgClient:
         client = IgClient(session_path=session_path)
         client.login("testuser", "testpass")
 
-        # Should try load, fail, then do fresh login
+        # Should try load (fail), then do fresh login
         mock_client.load_settings.assert_called_once()
-        assert mock_client.login.call_count == 2  # Once in try, once in fallback
+        mock_client.login.assert_called_once_with("testuser", "testpass")
 
     @patch("src.ig.Client")
     def test_get_latest_post_items_success(self, mock_client_class):
@@ -159,16 +159,14 @@ class TestIgClient:
         story1 = Mock()
         story1.pk = 111
         story1.caption = "Story 1"
-        story1.taken_at = Mock()
-        story1.taken_at.timestamp.return_value = 1000.0
+        story1.taken_at = 1000  # Use int for sorting, not Mock
         story1.is_close_friends = False
 
         # Mock close friends story
         story2 = Mock()
         story2.pk = 222
         story2.caption = "CF Story"
-        story2.taken_at = Mock()
-        story2.taken_at.timestamp.return_value = 2000.0
+        story2.taken_at = 2000  # Use int for sorting, not Mock
         story2.is_close_friends = True
 
         mock_client.user_stories.return_value = [story2, story1]  # Unordered
@@ -199,7 +197,10 @@ class TestIgClient:
         mock_follower2.pk = 222
         mock_follower2.username = "follower2"
 
-        mock_client.user_followers_v1.return_value = {111: mock_follower1, 222: mock_follower2}
+        mock_client.user_followers_v1.return_value = {
+            111: mock_follower1,
+            222: mock_follower2,
+        }
 
         client = IgClient(session_path=Path("test.json"))
         followers = client.get_followers_map()

@@ -476,7 +476,7 @@ def api_health():
     """
     import os
     from pathlib import Path
-    
+
     try:
         # Check required files exist
         checks = {
@@ -484,30 +484,39 @@ def api_health():
             "settings_file_exists": Path("settings.json").exists(),
             "state_file_exists": Path("state.json").exists(),
         }
-        
+
         # Check environment variables
         env_vars = {
             "ig_username_set": bool(os.getenv("IG_USERNAME")),
             "ig_password_set": bool(os.getenv("IG_PASSWORD")),
-            "wa_contact_set": bool(os.getenv("WA_CONTENT_CONTACT_NAME") or os.getenv("WA_CONTACT_NAME")),
+            "wa_contact_set": bool(
+                os.getenv("WA_CONTENT_CONTACT_NAME") or os.getenv("WA_CONTACT_NAME")
+            ),
         }
-        
+
         # Overall health
         all_checks_pass = all(checks.values()) and all(env_vars.values())
-        
-        return jsonify({
-            "status": "healthy" if all_checks_pass else "degraded",
-            "checks": checks,
-            "environment": env_vars,
-            "version": "1.0.0",
-        }), 200 if all_checks_pass else 503
-        
+
+        return jsonify(
+            {
+                "status": "healthy" if all_checks_pass else "degraded",
+                "checks": checks,
+                "environment": env_vars,
+                "version": "1.0.0",
+            }
+        ), (200 if all_checks_pass else 503)
+
     except Exception as e:
-        return jsonify({
-            "status": "unhealthy",
-            "error": str(e),
-            "version": "1.0.0",
-        }), 500
+        return (
+            jsonify(
+                {
+                    "status": "unhealthy",
+                    "error": str(e),
+                    "version": "1.0.0",
+                }
+            ),
+            500,
+        )
 
 
 @app.get("/api/settings")

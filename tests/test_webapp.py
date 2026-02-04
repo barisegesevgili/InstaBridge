@@ -34,9 +34,12 @@ class TestRoutes:
 class TestSettingsAPI:
     """Test settings API endpoints."""
 
-    @patch("src.webapp.load_config")
+    @patch("src.webapp.settings_to_public_dict")
     @patch("src.webapp.load_settings")
-    def test_get_settings(self, mock_load_settings, mock_load_config, client):
+    @patch("src.webapp.load_config")
+    def test_get_settings(
+        self, mock_load_config, mock_load_settings, mock_to_dict, client
+    ):
         """Test GET /api/settings."""
         # Mock config
         mock_config = Mock()
@@ -54,6 +57,9 @@ class TestSettingsAPI:
         mock_settings.schedule.time_hhmm = "19:00"
         mock_settings.recipients = []
         mock_load_settings.return_value = mock_settings
+
+        # Mock serialization
+        mock_to_dict.return_value = {"version": 1, "recipients": []}
 
         response = client.get("/api/settings")
         assert response.status_code == 200
@@ -204,8 +210,7 @@ class TestAnalyticsAPI:
         """Test /api/not-following-back handles rate limiting."""
         from src.insights import RateLimitedError
 
-        error = RateLimitedError("Rate limited")
-        error.retry_after_s = 600
+        error = RateLimitedError("Rate limited", retry_after_s=600)
         mock_nfb.side_effect = error
 
         response = client.get("/api/not-following-back")
