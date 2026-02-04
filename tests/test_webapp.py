@@ -135,7 +135,7 @@ class TestSchedulerAPI:
         client,
     ):
         """Test /api/scheduler/next-run when scheduler is enabled."""
-        from datetime import datetime, timedelta, timezone
+        from datetime import datetime, timezone
 
         mock_config = Mock()
         mock_config.wa_content_contact_name = "Test"
