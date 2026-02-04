@@ -1,10 +1,14 @@
-# 📱 InstaToWhatsapp
+# 🌉 InstaBridge
 
-> **Automatically forward your Instagram posts and stories to friends on WhatsApp**
+> **The Open-Source Alternative for Instagram to WhatsApp Automation**
+> 
+> Automatically forward Instagram posts, stories, and reels to WhatsApp, Telegram, and more
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.13+](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/downloads/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
+**Why InstaBridge?** Free, open-source, personal use focused - unlike $50-500/month commercial tools designed for businesses
 
 ---
 
@@ -27,9 +31,9 @@
 
 ---
 
-## 🎯 What This Does
+## 🎯 What InstaBridge Does
 
-InstaToWhatsapp is a **personal automation tool** that:
+InstaBridge is a **free, open-source personal automation tool** that:
 
 - 📸 Monitors your Instagram for new posts and stories
 - 🤖 Automatically downloads media content
@@ -56,26 +60,40 @@ InstaToWhatsapp is a **personal automation tool** that:
 │   (instagrapi)  │──┐
 └─────────────────┘  │
                      │  ┌──────────────────┐
-                     ├──│  Core Engine     │
-                     │  │  - State Mgmt    │
-┌─────────────────┐  │  │  - Scheduling    │
-│   WhatsApp Web  │  │  │  - Multi-recipient│
-│   (Playwright)  │──┘  │  - Deduplication │
-└─────────────────┘     └──────────────────┘
-                              │
-                    ┌─────────┴─────────┐
-                    │                   │
-              ┌─────▼─────┐      ┌─────▼─────┐
-              │  Web UI   │      │  Insights │
-              │  (Flask)  │      │  Engine   │
-              └───────────┘      └───────────┘
+                     ├──│  InstaBridge     │
+                     │  │  Core Engine     │
+┌─────────────────┐  │  │  - State Mgmt    │
+│   WhatsApp Web  │  │  │  - Scheduling    │
+│   (Playwright)  │──┤  │  - Multi-platform│
+└─────────────────┘  │  │  - Deduplication │
+                     │  └──────────────────┘
+┌─────────────────┐  │           │
+│  Telegram       │──┘  ┌────────┴─────────┐
+│  (Coming Soon)  │     │                  │
+└─────────────────┘ ┌───▼────┐      ┌─────▼─────┐
+                    │ Web UI │      │ Analytics │
+                    │ (Flask)│      │  Engine   │
+                    └────────┘      └───────────┘
 ```
+
+**Extensible Design:** Ready for Telegram, Discord, and more platforms
 
 See [ARCHITECTURE.md](docs/ARCHITECTURE.md) for detailed design decisions.
 
 ---
 
 ## ✨ Features
+
+### 🌟 **Why Choose InstaBridge Over Commercial Tools?**
+
+| Feature | Commercial Tools | InstaBridge |
+|---------|-----------------|-------------|
+| **Cost** | $50-500/month | Free Forever |
+| **Target** | Business/Marketing | Personal Use |
+| **Open Source** | ❌ Closed | ✅ Open |
+| **Learning** | ❌ Black box | ✅ Educational |
+| **Extensibility** | ❌ Locked | ✅ Add platforms |
+| **Privacy** | ⚠️ Cloud-based | ✅ Self-hosted |
 
 ### 🎯 Core Automation
 - ✅ Instagram post/story monitoring
@@ -118,8 +136,8 @@ See [ARCHITECTURE.md](docs/ARCHITECTURE.md) for detailed design decisions.
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/InstaToWhatsapp.git
-cd InstaToWhatsapp
+git clone https://github.com/barisegesevgili/InstaBridge.git
+cd InstaBridge
 
 # Create virtual environment
 python3 -m venv .venv
@@ -391,9 +409,31 @@ InstaToWhatsapp/
 
 ---
 
+## 🚀 Roadmap
+
+### Current (v1.0) ✅
+- WhatsApp automation
+- Multi-recipient support
+- Analytics & insights
+
+### Coming Soon (v1.1) 🔜
+- **Telegram support** 
+- **Discord webhooks**
+- Docker deployment
+- Enhanced UI
+
+### Future (v2.0) 💡
+- Multi-platform dashboard
+- Plugin architecture
+- Cloud deployment options
+
+See [ROADMAP.md](docs/ROADMAP.md) for details.
+
+---
+
 ## 🤝 Contributing
 
-We welcome contributions! This project is ideal for learning:
+We welcome contributions! InstaBridge is ideal for learning:
 
 - Browser automation (Playwright)
 - Unofficial API usage (instagrapi)
@@ -403,11 +443,12 @@ We welcome contributions! This project is ideal for learning:
 
 **Ways to contribute:**
 
-- 🐛 Report bugs via [Issues](https://github.com/yourusername/InstaToWhatsapp/issues)
-- 💡 Suggest features
+- 🐛 Report bugs via [Issues](https://github.com/barisegesevgili/InstaBridge/issues)
+- 💡 Suggest features (Telegram, Discord, etc.)
 - 📖 Improve documentation
 - 🧪 Add tests
 - 🔧 Fix bugs or add features
+- 🌍 Add new platform integrations
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
@@ -461,16 +502,20 @@ See [ROADMAP.md](docs/ROADMAP.md) for details.
 
 ## 🙏 Acknowledgments
 
-This project was built for educational purposes to understand:
+**InstaBridge is the open-source alternative to:**
+- Zapier Instagram+WhatsApp integrations ($20-100/month)
+- Interakt (CRM tool for businesses)
+- Bardeen.ai (paid automation)
+- Mark360.ai (enterprise solution)
 
-- Browser automation techniques
-- Unofficial API patterns
-- State management in automation
-- Multi-platform compatibility
+Built for personal use, learning, and the open-source community.
 
-**Inspiration:**
+**Technology Stack:**
 - [instagrapi](https://github.com/adw0rd/instagrapi) - Instagram API
 - [Playwright](https://playwright.dev/) - Browser automation
+- [Flask](https://flask.palletsprojects.com/) - Web interface
+
+**Inspired By:**
 - [SuperClaude Framework](https://github.com/SuperClaude-Org/SuperClaude_Framework) - Project structure
 
 ---
@@ -485,16 +530,21 @@ MIT License with important disclaimers - see [LICENSE](LICENSE) for details.
 
 ## 📞 Support
 
-- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/yourusername/InstaToWhatsapp/issues)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/yourusername/InstaToWhatsapp/discussions)
+- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/barisegesevgili/InstaBridge/issues)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/barisegesevgili/InstaBridge/discussions)
 - 📖 **Documentation**: [docs/](docs/)
+- 🌟 **Show Support**: Star the repo if you find it useful!
 
 ---
 
 <div align="center">
 
-**Built with ❤️ for learning browser automation**
+**🌉 InstaBridge - Bridge Your Social Media Platforms**
 
-[⭐ Star this repo](https://github.com/yourusername/InstaToWhatsapp) | [🐛 Report Bug](https://github.com/yourusername/InstaToWhatsapp/issues) | [💡 Request Feature](https://github.com/yourusername/InstaToWhatsapp/issues)
+**Free Forever • Open Source • Extensible • Privacy-First**
+
+[⭐ Star this repo](https://github.com/barisegesevgili/InstaBridge) | [🐛 Report Bug](https://github.com/barisegesevgili/InstaBridge/issues) | [💡 Request Platform](https://github.com/barisegesevgili/InstaBridge/issues)
+
+**Made with ❤️ for the open-source community**
 
 </div>

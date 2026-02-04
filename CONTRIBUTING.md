@@ -1,6 +1,10 @@
-# Contributing to InstaToWhatsapp
+# Contributing to InstaBridge
 
-Thank you for considering contributing to InstaToWhatsapp! This document provides guidelines for contributing to the project.
+Thank you for considering contributing to InstaBridge! This document provides guidelines for contributing to the project.
+
+## 🌉 About InstaBridge
+
+InstaBridge is the open-source alternative to commercial Instagram automation tools. We focus on personal use, extensibility, and education.
 
 ## Code of Conduct
 
@@ -42,8 +46,8 @@ Enhancement suggestions are tracked as GitHub issues. Provide:
 
 ```bash
 # Clone your fork
-git clone https://github.com/YOUR_USERNAME/InstaToWhatsapp.git
-cd InstaToWhatsapp
+git clone https://github.com/YOUR_USERNAME/InstaBridge.git
+cd InstaBridge
 
 # Create virtual environment
 python3 -m venv .venv

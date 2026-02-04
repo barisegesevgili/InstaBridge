@@ -1,6 +1,8 @@
 # Detailed Setup Guide
 
-Complete step-by-step instructions for setting up InstaToWhatsapp.
+Complete step-by-step instructions for setting up InstaBridge.
+
+**🌉 InstaBridge** - Free, open-source, extensible Instagram automation.
 
 ## Prerequisites Checklist
 
@@ -23,8 +25,8 @@ python3 --version
 
 ```bash
 cd /path/to/your/projects
-git clone https://github.com/yourusername/InstaToWhatsapp.git
-cd InstaToWhatsapp
+git clone https://github.com/barisegesevgili/InstaBridge.git
+cd InstaBridge
 
 python3 -m venv .venv
 ```

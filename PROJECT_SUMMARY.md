@@ -1,13 +1,15 @@
-# InstaToWhatsapp - Project Summary
+# InstaBridge - Project Summary
 
 ## What We Built
 
-A complete, production-ready open-source project for learning browser automation and unofficial API usage.
+A complete, production-ready open-source project - **the free alternative to commercial Instagram automation tools** ($50-500/month).
+
+**Key Differentiator:** Extensible multi-platform design (WhatsApp, Telegram, Discord) for personal use and learning.
 
 ## Structure Overview
 
 ```
-InstaToWhatsapp/
+InstaBridge/
 ├── 📄 Core Documentation
 │   ├── README.md              # Complete project overview with warnings
 │   ├── LICENSE                # MIT License with ToS disclaimer  
@@ -132,12 +134,13 @@ InstaToWhatsapp/
 - **CI/CD workflows** - Automated testing
 - **Clear organization** - Logical file structure
 
-### Tailored for InstaToWhatsapp 🎯
-- **Simpler scope** - Personal automation, not framework
-- **Focused docs** - Instagram/WhatsApp specific
-- **Lighter infrastructure** - No plugin system (yet)
+### Tailored for InstaBridge 🎯
+- **Simpler scope** - Personal automation, not enterprise framework
+- **Multi-platform ready** - WhatsApp + future Telegram/Discord
+- **Competitive positioning** - Open-source alternative to paid tools
 - **Educational focus** - Learning tool, not production SaaS
 - **ToS warnings** - Prominent legal disclaimers
+- **Extensibility** - Ready for community platform additions
 
 ### What We Didn't Need ❌
 - Plugin marketplace system

@@ -2,7 +2,9 @@
 
 ## System Overview
 
-InstaToWhatsapp is a personal automation tool that bridges Instagram and WhatsApp using unofficial APIs and browser automation.
+**InstaBridge** is an open-source personal automation platform that bridges Instagram with messaging platforms (WhatsApp, Telegram, Discord) using unofficial APIs and browser automation.
+
+**Design Philosophy:** Extensible, multi-platform, self-hosted alternative to commercial tools.
 
 ## Design Principles
 

@@ -1,6 +1,8 @@
 # Quick Start Guide
 
-Get InstaToWhatsapp running in 5 minutes.
+Get InstaBridge running in 5 minutes.
+
+**🌉 InstaBridge** - The free, open-source alternative to $50-500/month commercial tools.
 
 ## ⚠️ Important First
 
@@ -9,8 +11,9 @@ Get InstaToWhatsapp running in 5 minutes.
 ## Step 1: Setup (2 minutes)
 
 ```bash
-# Clone and enter directory
-cd InstaToWhatsapp
+# Clone the repository
+git clone https://github.com/barisegesevgili/InstaBridge.git
+cd InstaBridge
 
 # Create virtual environment
 python3 -m venv .venv
