@@ -329,13 +329,22 @@ Or use the Web UI at `http://127.0.0.1:5000/settings` to manage visually.
 - `follow_cache.json` - Follower/following cache
 - `user_cache.json` - User stats cache
 
-### Rate Limiting & Delays
+### Rate Limiting & Delays 🛡️
 
-The tool includes smart delays to avoid Instagram rate limits:
+**v1.0.1+ includes comprehensive rate limiting to minimize ban risk:**
 
-- **Post fetching**: Respects Instagram API limits
-- **User stats**: 0.7-1.0s delay between requests
-- **Retry logic**: Exponential backoff on failures
+- **Automatic delays**: 2-5 seconds + random jitter between all Instagram requests
+- **Hourly limits**: Max 60 requests per hour (configurable)
+- **Human-like timing**: Random variations to avoid detection patterns
+- **Download throttling**: 0.5-1.5s delays between file downloads
+- **Analytics delays**: 0.7-1.0s between user stats requests
+
+**Three safety levels:**
+- `CONSERVATIVE`: 3-7s delays, 40 req/hour (safest for new accounts)
+- `MODERATE`: 2-5s delays, 60 req/hour (default, balanced)
+- `AGGRESSIVE`: 1-3s delays, 80 req/hour (higher risk, testing only)
+
+**📖 See [Safe Usage Guide](docs/SAFE_USAGE_GUIDE.md) for detailed recommendations.**
 
 ### Platform-Specific Notes
 
@@ -495,10 +504,11 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 | Document | Description |
 |----------|-------------|
+| [SAFE_USAGE_GUIDE.md](docs/SAFE_USAGE_GUIDE.md) | **⚠️ Minimize account ban risk** |
+| [SECURITY_BEST_PRACTICES.md](docs/SECURITY_BEST_PRACTICES.md) | Security guidelines & credential safety |
 | [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Design decisions & system overview |
 | [SETUP.md](docs/SETUP.md) | Detailed setup guide |
 | [TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) | Common issues & solutions |
-| [SECURITY_BEST_PRACTICES.md](docs/SECURITY_BEST_PRACTICES.md) | Security guidelines & best practices |
 | [ROADMAP.md](docs/ROADMAP.md) | Future plans & wishlist |
 | [CHANGELOG.md](CHANGELOG.md) | Version history |
 

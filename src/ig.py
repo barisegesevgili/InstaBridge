@@ -6,6 +6,8 @@ from typing import Optional
 
 from instagrapi import Client
 
+from src.rate_limiter import RateLimits, human_like_delay
+
 
 @dataclass(frozen=True)
 class IgItem:
@@ -20,7 +22,12 @@ class IgItem:
     story_is_close_friends: Optional[bool] = None
 
     def download(self, dest_dir: Path) -> list[Path]:
+        """Download media with small human-like delay between files."""
         dest_dir.mkdir(exist_ok=True)
+        
+        # Small delay to appear more human-like
+        human_like_delay(0.5, 1.5)
+        
         if self.kind == "post":
             info = self._client.media_info(self._media_pk)
             media_type = getattr(info, "media_type", None)  # 1=photo,2=video,8=album
@@ -52,9 +59,11 @@ class IgItem:
 
 
 class IgClient:
-    def __init__(self, *, session_path: Path) -> None:
+    def __init__(self, *, session_path: Path, enable_rate_limiting: bool = True) -> None:
         self._cl = Client()
         self._session_path = session_path
+        self._enable_rate_limiting = enable_rate_limiting
+        self._rate_limiter = RateLimits.MODERATE  # Balanced rate limiting
 
     def login(self, username: str, password: str) -> None:
         if self._session_path.exists():
@@ -154,6 +163,10 @@ class IgClient:
         return out
 
     def get_latest_post_items(self) -> list[IgItem]:
+        """Fetch latest post with rate limiting."""
+        if self._enable_rate_limiting:
+            self._rate_limiter.wait()
+        
         user_id = self._cl.user_id
         if not user_id:
             return []
@@ -194,7 +207,11 @@ class IgClient:
     ) -> list[IgItem]:
         """
         Returns posts newer than since_ts (unix seconds), newest first.
+        Includes rate limiting to prevent account bans.
         """
+        if self._enable_rate_limiting:
+            self._rate_limiter.wait()
+        
         user_id = self._cl.user_id
         if not user_id:
             return []
@@ -227,6 +244,10 @@ class IgClient:
         return out
 
     def get_active_story_items(self) -> list[IgItem]:
+        """Fetch active stories with rate limiting."""
+        if self._enable_rate_limiting:
+            self._rate_limiter.wait()
+        
         user_id = self._cl.user_id
         if not user_id:
             return []
