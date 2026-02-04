@@ -122,10 +122,21 @@ class TestSettingsAPI:
 class TestSchedulerAPI:
     """Test scheduler API endpoint."""
 
-    @patch("src.webapp.load_config")
+    @patch("src.webapp.datetime")
+    @patch("src.webapp.ZoneInfo")
     @patch("src.webapp.load_settings")
-    def test_next_run_enabled(self, mock_load_settings, mock_load_config, client):
+    @patch("src.webapp.load_config")
+    def test_next_run_enabled(
+        self,
+        mock_load_config,
+        mock_load_settings,
+        mock_zone_info,
+        mock_datetime,
+        client,
+    ):
         """Test /api/scheduler/next-run when scheduler is enabled."""
+        from datetime import datetime, timedelta, timezone
+
         mock_config = Mock()
         mock_config.wa_content_contact_name = "Test"
         mock_config.wa_content_phone = ""
@@ -140,6 +151,16 @@ class TestSchedulerAPI:
         mock_settings.schedule = mock_schedule
         mock_load_settings.return_value = mock_settings
 
+        # Mock timezone
+        mock_tz = timezone.utc
+        mock_zone_info.return_value = mock_tz
+
+        # Mock datetime.now()
+        mock_now = datetime(2026, 2, 4, 15, 30, tzinfo=timezone.utc)
+        mock_datetime.now.return_value = mock_now
+        # Mock datetime methods needed by the endpoint
+        mock_datetime.side_effect = lambda *args, **kwargs: datetime(*args, **kwargs)
+
         response = client.get("/api/scheduler/next-run")
         assert response.status_code == 200
 
@@ -148,10 +169,15 @@ class TestSchedulerAPI:
         assert "next_run" in data
         assert data["tz"] == "Europe/Berlin"
 
-    @patch("src.webapp.load_config")
+    @patch("src.webapp.ZoneInfo")
     @patch("src.webapp.load_settings")
-    def test_next_run_disabled(self, mock_load_settings, mock_load_config, client):
+    @patch("src.webapp.load_config")
+    def test_next_run_disabled(
+        self, mock_load_config, mock_load_settings, mock_zone_info, client
+    ):
         """Test /api/scheduler/next-run when scheduler is disabled."""
+        from datetime import timezone
+
         mock_config = Mock()
         mock_config.wa_content_contact_name = "Test"
         mock_config.wa_content_phone = ""
@@ -165,6 +191,9 @@ class TestSchedulerAPI:
         mock_settings = Mock()
         mock_settings.schedule = mock_schedule
         mock_load_settings.return_value = mock_settings
+
+        # Mock timezone
+        mock_zone_info.return_value = timezone.utc
 
         response = client.get("/api/scheduler/next-run")
         assert response.status_code == 200
