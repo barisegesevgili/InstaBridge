@@ -1,12 +1,7 @@
 """Tests for settings management."""
 
-import pytest
 from src.settings import (
     RecipientSettings,
-    ScheduleSettings,
-    AppSettings,
-    load_settings,
-    save_settings,
     settings_from_public_dict,
     _normalize_phone,
     _validate_time_hhmm,

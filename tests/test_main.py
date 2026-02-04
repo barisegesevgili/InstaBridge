@@ -1,13 +1,10 @@
 """Tests for main orchestration."""
 
-import os
 import time
-from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 import pytest
 
 from src.main import (
-    Config,
     load_config,
     _format_run_caption,
     _recipient_wants_item,

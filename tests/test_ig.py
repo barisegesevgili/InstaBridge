@@ -1,9 +1,7 @@
 """Tests for Instagram client."""
 
-import json
 from pathlib import Path
-from unittest.mock import MagicMock, Mock, patch
-import tempfile
+from unittest.mock import Mock, patch
 import pytest
 
 from src.ig import IgClient, IgItem

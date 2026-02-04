@@ -2,8 +2,6 @@
 
 import json
 from pathlib import Path
-import tempfile
-import pytest
 
 from src.state import State, load_state, save_state
 
