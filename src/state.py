@@ -3,7 +3,6 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional, Set
 
-
 STATE_PATH = Path("state.json")
 
 
@@ -56,10 +55,13 @@ def load_state() -> State:
 def save_state(state: State) -> None:
     payload = {
         "sent_ids": sorted(state.sent_ids),
-        "sent_ids_by_recipient": {k: sorted(list(v)) for k, v in (state.sent_ids_by_recipient or {}).items()},
+        "sent_ids_by_recipient": {
+            k: sorted(list(v)) for k, v in (state.sent_ids_by_recipient or {}).items()
+        },
         "last_run_ts": state.last_run_ts,
         "last_run_files": list(state.last_run_files),
         "last_run_caption": state.last_run_caption,
     }
-    STATE_PATH.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-
+    STATE_PATH.write_text(
+        json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    )

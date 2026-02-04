@@ -127,9 +127,12 @@ def resend_last(*, cfg: Config, max_files: int = 0) -> None:
     print("WhatsApp Web ready.")
     wa.open_chat(contact_name=cfg.wa_content_contact_name, phone=cfg.wa_content_phone)
     print(f"Re-sending last batch ({len(files)} file(s))...")
-    wa.send_media_batch(cfg.wa_content_contact_name, files, phone=cfg.wa_content_phone, caption=caption)
+    wa.send_media_batch(
+        cfg.wa_content_contact_name, files, phone=cfg.wa_content_phone, caption=caption
+    )
     wa.stop()
     print("Done: re-sent last batch (state unchanged).")
+
 
 def run_once(*, cfg: Config, force_resend_current: bool = False) -> None:
     media_dir = Path("media")
@@ -151,7 +154,11 @@ def run_once(*, cfg: Config, force_resend_current: bool = False) -> None:
     wa.start()
     print("WhatsApp Web ready.")
 
-    recipients = [r for r in (settings.recipients or []) if r.enabled and (r.wa_contact_name or r.wa_phone)]
+    recipients = [
+        r
+        for r in (settings.recipients or [])
+        if r.enabled and (r.wa_contact_name or r.wa_phone)
+    ]
     if not recipients:
         wa.stop()
         print("Done: no enabled recipients configured in settings.json.")
@@ -202,7 +209,9 @@ def run_once(*, cfg: Config, force_resend_current: bool = False) -> None:
         return
 
     # Download each needed item once (then send to multiple recipients).
-    unique_needed = {it.unique_id: it for lst in items_by_recipient.values() for it in lst}
+    unique_needed = {
+        it.unique_id: it for lst in items_by_recipient.values() for it in lst
+    }
     downloaded: dict[str, list[Path]] = {}
     run_files: list[Path] = []
     for uid, it in unique_needed.items():
@@ -227,7 +236,12 @@ def run_once(*, cfg: Config, force_resend_current: bool = False) -> None:
                 continue
             caption = _format_run_caption(cfg.message_prefix, [it])
             print(f"Sending {len(paths)} file(s) for {it.unique_id}...")
-            wa.send_media_batch(r.wa_contact_name or r.display_name, paths, phone=r.wa_phone, caption=caption)
+            wa.send_media_batch(
+                r.wa_contact_name or r.display_name,
+                paths,
+                phone=r.wa_phone,
+                caption=caption,
+            )
             sent_set.add(it.unique_id)
             state.sent_ids.add(it.unique_id)  # legacy/global dedupe
             save_state(state)
@@ -246,9 +260,22 @@ def run_once(*, cfg: Config, force_resend_current: bool = False) -> None:
 def main() -> None:
     cfg = load_config()
     ap = argparse.ArgumentParser()
-    ap.add_argument("--resend-last", action="store_true", help="Resend last run's files from state.json (test mode).")
-    ap.add_argument("--max-files", type=int, default=0, help="Limit number of files sent (test mode).")
-    ap.add_argument("--force", action="store_true", help="Ignore dedupe for current IG items (test mode).")
+    ap.add_argument(
+        "--resend-last",
+        action="store_true",
+        help="Resend last run's files from state.json (test mode).",
+    )
+    ap.add_argument(
+        "--max-files",
+        type=int,
+        default=0,
+        help="Limit number of files sent (test mode).",
+    )
+    ap.add_argument(
+        "--force",
+        action="store_true",
+        help="Ignore dedupe for current IG items (test mode).",
+    )
     args = ap.parse_args()
 
     if args.resend_last:
@@ -260,4 +287,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

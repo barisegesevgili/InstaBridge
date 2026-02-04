@@ -43,7 +43,9 @@ def main() -> None:
 
         if not st.schedule.enabled:
             now = datetime.now(tz)
-            print(f"[scheduler] Schedule disabled in settings.json. Now: {now.isoformat()} ({tz_name}). Sleeping 60s")
+            print(
+                f"[scheduler] Schedule disabled in settings.json. Now: {now.isoformat()} ({tz_name}). Sleeping 60s"
+            )
             time.sleep(60)
             continue
 
@@ -65,7 +67,11 @@ def main() -> None:
                 default_recipient_name=cfg.wa_content_contact_name,
                 default_recipient_phone=cfg.wa_content_phone,
             )
-            if not st2.schedule.enabled or st2.schedule.time_hhmm != st.schedule.time_hhmm or (st2.schedule.tz or "") != (st.schedule.tz or ""):
+            if (
+                not st2.schedule.enabled
+                or st2.schedule.time_hhmm != st.schedule.time_hhmm
+                or (st2.schedule.tz or "") != (st.schedule.tz or "")
+            ):
                 break
         try:
             print("[scheduler] Running...")
@@ -78,4 +84,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

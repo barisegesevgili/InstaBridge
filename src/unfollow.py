@@ -8,7 +8,6 @@ from src.insights import get_not_following_back_usernames
 from src.main import load_config
 from src.wa import WhatsAppSender
 
-
 SNAPSHOT_PATH = Path("unfollow_state.json")
 
 
@@ -22,7 +21,9 @@ def load_snapshot() -> dict:
 
 
 def save_snapshot(snapshot: dict) -> None:
-    SNAPSHOT_PATH.write_text(json.dumps(snapshot, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    SNAPSHOT_PATH.write_text(
+        json.dumps(snapshot, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
 
 
 def list_not_following_back() -> list[str]:
@@ -39,7 +40,9 @@ def check_unfollows_and_update(*, notify: bool) -> list[str]:
     now = time.time()
 
     snap = load_snapshot()
-    prev = snap.get("followers", {}) if isinstance(snap.get("followers", {}), dict) else {}
+    prev = (
+        snap.get("followers", {}) if isinstance(snap.get("followers", {}), dict) else {}
+    )
     prev = {int(k): str(v) for k, v in prev.items() if str(k).isdigit()}
 
     unfollowed_ids = sorted(set(prev.keys()) - set(current.keys()))
@@ -65,9 +68,21 @@ def check_unfollows_and_update(*, notify: bool) -> list[str]:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--not-following-back", action="store_true", help="List users you follow who don't follow you back.")
-    ap.add_argument("--check-unfollows", action="store_true", help="Compare followers with last snapshot and update.")
-    ap.add_argument("--notify", action="store_true", help="Send WhatsApp message if unfollows detected (with --check-unfollows).")
+    ap.add_argument(
+        "--not-following-back",
+        action="store_true",
+        help="List users you follow who don't follow you back.",
+    )
+    ap.add_argument(
+        "--check-unfollows",
+        action="store_true",
+        help="Compare followers with last snapshot and update.",
+    )
+    ap.add_argument(
+        "--notify",
+        action="store_true",
+        help="Send WhatsApp message if unfollows detected (with --check-unfollows).",
+    )
     args = ap.parse_args()
 
     if args.not_following_back or (not args.check_unfollows):
@@ -88,4 +103,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

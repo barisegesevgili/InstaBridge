@@ -3,10 +3,19 @@ from zoneinfo import ZoneInfo
 
 from flask import Flask, jsonify, render_template_string, request
 
-from src.insights import RateLimitedError, not_following_back_detailed, reset_warm_cache_state, warm_user_cache_step
+from src.insights import (
+    RateLimitedError,
+    not_following_back_detailed,
+    reset_warm_cache_state,
+    warm_user_cache_step,
+)
 from src.main import load_config
-from src.settings import load_settings, save_settings, settings_from_public_dict, settings_to_public_dict
-
+from src.settings import (
+    load_settings,
+    save_settings,
+    settings_from_public_dict,
+    settings_to_public_dict,
+)
 
 app = Flask(__name__)
 
@@ -449,6 +458,7 @@ SETTINGS_HTML = """<!doctype html>
 def index():
     return render_template_string(INDEX_HTML)
 
+
 @app.get("/settings")
 def settings_page():
     return render_template_string(SETTINGS_HTML)
@@ -518,6 +528,7 @@ def api_scheduler_next_run():
 @app.get("/api/not-following-back")
 def api_not_following_back():
     try:
+
         def as_int(name: str):
             v = request.args.get(name, "").strip()
             return int(v) if v else None
@@ -539,7 +550,15 @@ def api_not_following_back():
         )
         return jsonify({"count": len(users), "users": users})
     except RateLimitedError as rl:
-        return jsonify({"error": str(rl), "retry_after_s": int(getattr(rl, "retry_after_s", 600))}), 429
+        return (
+            jsonify(
+                {
+                    "error": str(rl),
+                    "retry_after_s": int(getattr(rl, "retry_after_s", 600)),
+                }
+            ),
+            429,
+        )
     except Exception as e:  # noqa: BLE001
         return jsonify({"error": str(e)}), 500
 
@@ -558,7 +577,9 @@ def api_warm_cache_step():
     try:
         chunk_size = int(request.args.get("chunk_size", "25") or 25)
         refresh_follow_cache = request.args.get("refresh_follow_cache", "0") != "0"
-        data = warm_user_cache_step(chunk_size=chunk_size, refresh_follow_cache=refresh_follow_cache)
+        data = warm_user_cache_step(
+            chunk_size=chunk_size, refresh_follow_cache=refresh_follow_cache
+        )
         return jsonify(data)
     except Exception as e:  # noqa: BLE001
         return jsonify({"error": str(e)}), 500
@@ -571,4 +592,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

@@ -136,7 +136,10 @@ class IgClient:
         else:
             # Unknown shape; try iterating as list
             try:
-                it = [(getattr(u, "pk", None) or getattr(u, "id", None), u) for u in list(data)]
+                it = [
+                    (getattr(u, "pk", None) or getattr(u, "id", None), u)
+                    for u in list(data)
+                ]
             except Exception:
                 return out
 
@@ -186,7 +189,9 @@ class IgClient:
             )
         ]
 
-    def get_new_post_items_since(self, since_ts: float, *, max_posts: int = 10) -> list[IgItem]:
+    def get_new_post_items_since(
+        self, since_ts: float, *, max_posts: int = 10
+    ) -> list[IgItem]:
         """
         Returns posts newer than since_ts (unix seconds), newest first.
         """
@@ -243,7 +248,9 @@ class IgClient:
             if is_cf is None:
                 # Best-effort: some builds expose audience as string / enum
                 try:
-                    aud = getattr(s, "audience", None) or getattr(s, "audience_type", None)
+                    aud = getattr(s, "audience", None) or getattr(
+                        s, "audience_type", None
+                    )
                     if isinstance(aud, str):
                         is_cf = "close" in aud.lower()
                 except Exception:
@@ -289,8 +296,11 @@ class IgClient:
             title="Latest story",
             caption=caption,
             created_ts=taken_ts,
-            story_is_close_friends=getattr(s, "is_close_friends", None) if isinstance(getattr(s, "is_close_friends", None), bool) else None,
+            story_is_close_friends=(
+                getattr(s, "is_close_friends", None)
+                if isinstance(getattr(s, "is_close_friends", None), bool)
+                else None
+            ),
             _client=self._cl,
             _media_pk=int(s.pk),
         )
-

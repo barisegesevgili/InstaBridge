@@ -33,9 +33,17 @@ def cleanup_media_dir() -> None:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--time", default="14:50", help="Target time HH:MM (default 14:50)")
-    ap.add_argument("--tz", default="Europe/Berlin", help="IANA timezone (default Europe/Berlin)")
-    ap.add_argument("--resend-last", action="store_true", help="Resend last batch (test)")
-    ap.add_argument("--cleanup-media", action="store_true", help="Delete media/ contents after success")
+    ap.add_argument(
+        "--tz", default="Europe/Berlin", help="IANA timezone (default Europe/Berlin)"
+    )
+    ap.add_argument(
+        "--resend-last", action="store_true", help="Resend last batch (test)"
+    )
+    ap.add_argument(
+        "--cleanup-media",
+        action="store_true",
+        help="Delete media/ contents after success",
+    )
     args = ap.parse_args()
 
     hour_s, minute_s = args.time.split(":", 1)
@@ -46,7 +54,9 @@ def main() -> None:
     now = datetime.now(tz)
     nxt = next_time(now, hour=hour, minute=minute)
     sleep_s = max(1.0, (nxt - now).total_seconds())
-    print(f"[run_at] Now: {now.isoformat()} | Scheduled: {nxt.isoformat()} | Sleeping {sleep_s:.0f}s")
+    print(
+        f"[run_at] Now: {now.isoformat()} | Scheduled: {nxt.isoformat()} | Sleeping {sleep_s:.0f}s"
+    )
     time.sleep(sleep_s)
 
     cfg = load_config()
@@ -70,4 +80,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

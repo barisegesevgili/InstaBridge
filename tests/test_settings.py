@@ -1,4 +1,5 @@
 """Tests for settings management."""
+
 import pytest
 from src.settings import (
     RecipientSettings,
@@ -8,7 +9,7 @@ from src.settings import (
     save_settings,
     settings_from_public_dict,
     _normalize_phone,
-    _validate_time_hhmm
+    _validate_time_hhmm,
 )
 
 
@@ -17,10 +18,7 @@ class TestRecipientSettings:
 
     def test_recipient_defaults(self):
         """Test default values for recipient."""
-        r = RecipientSettings(
-            id="test1",
-            display_name="Test User"
-        )
+        r = RecipientSettings(id="test1", display_name="Test User")
         assert r.id == "test1"
         assert r.display_name == "Test User"
         assert r.wa_contact_name == ""
@@ -84,11 +82,7 @@ class TestSettingsFromDict:
     def test_parse_basic_settings(self):
         """Test parsing basic settings structure."""
         data = {
-            "schedule": {
-                "enabled": True,
-                "tz": "Europe/Berlin",
-                "time_hhmm": "19:00"
-            },
+            "schedule": {"enabled": True, "tz": "Europe/Berlin", "time_hhmm": "19:00"},
             "recipients": [
                 {
                     "id": "friend1",
@@ -97,13 +91,13 @@ class TestSettingsFromDict:
                     "enabled": True,
                     "send_posts": True,
                     "send_stories": False,
-                    "send_close_friends_stories": False
+                    "send_close_friends_stories": False,
                 }
-            ]
+            ],
         }
-        
+
         settings = settings_from_public_dict(data)
-        
+
         assert settings.schedule.enabled is True
         assert settings.schedule.tz == "Europe/Berlin"
         assert settings.schedule.time_hhmm == "19:00"
@@ -114,17 +108,10 @@ class TestSettingsFromDict:
 
     def test_parse_with_missing_fields(self):
         """Test parsing with optional fields missing."""
-        data = {
-            "recipients": [
-                {
-                    "id": "user1",
-                    "display_name": "User"
-                }
-            ]
-        }
-        
+        data = {"recipients": [{"id": "user1", "display_name": "User"}]}
+
         settings = settings_from_public_dict(data)
-        
+
         # Should use defaults
         assert settings.schedule.enabled is True
         assert settings.schedule.tz == "Europe/Berlin"
@@ -140,9 +127,9 @@ class TestSettingsFromDict:
                 {"id": "valid", "display_name": "Duplicate ID"},  # Duplicate
             ]
         }
-        
+
         settings = settings_from_public_dict(data)
-        
+
         # Should only have 1 valid recipient (first with "valid" ID)
         assert len(settings.recipients) == 1
         assert settings.recipients[0].id == "valid"

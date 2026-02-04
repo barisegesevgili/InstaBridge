@@ -4,7 +4,6 @@ from zoneinfo import ZoneInfo
 
 from src.unfollow import check_unfollows_and_update
 
-
 TZ = ZoneInfo("Europe/Berlin")
 
 
@@ -29,7 +28,9 @@ WEEKDAY_NAME_TO_INT = {
 }
 
 
-def next_weekly_run(now: datetime, *, weekday: int, hour: int = 22, minute: int = 0) -> datetime:
+def next_weekly_run(
+    now: datetime, *, weekday: int, hour: int = 22, minute: int = 0
+) -> datetime:
     """
     Compute the next occurrence of weekday@hour:minute in Europe/Berlin.
     weekday: Monday=0 ... Sunday=6 (matches datetime.weekday()).
@@ -59,7 +60,9 @@ def main() -> None:
         now = datetime.now(TZ)
         nxt = next_weekly_run(now, weekday=weekday, hour=22, minute=0)
         sleep_s = max(1.0, (nxt - now).total_seconds())
-        print(f"[unfollow_scheduler] Now: {now.isoformat()} | Next run: {nxt.isoformat()} | Sleeping {sleep_s:.0f}s")
+        print(
+            f"[unfollow_scheduler] Now: {now.isoformat()} | Next run: {nxt.isoformat()} | Sleeping {sleep_s:.0f}s"
+        )
         time.sleep(sleep_s)
         try:
             print("[unfollow_scheduler] Checking unfollows...")
@@ -72,4 +75,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

@@ -75,7 +75,9 @@ class WhatsAppSender:
         while time.time() < deadline:
             try:
                 # If a chat is open, footer composer exists.
-                if self._page.locator('footer div[role="textbox"][contenteditable="true"]').first.is_visible():
+                if self._page.locator(
+                    'footer div[role="textbox"][contenteditable="true"]'
+                ).first.is_visible():
                     return
                 _ = self._get_search_box()
                 return
@@ -223,7 +225,9 @@ class WhatsAppSender:
                     last_err = e
                     continue
 
-            raise RuntimeError("Could not click Photos & videos menu item") from last_err
+            raise RuntimeError(
+                "Could not click Photos & videos menu item"
+            ) from last_err
 
         # On your WhatsApp build, "Photos & videos" opens a native macOS picker.
         # Element selectors can be flaky; keyboard navigation is more reliable:
@@ -246,7 +250,9 @@ class WhatsAppSender:
             if self._try_choose_file_in_macos_dialog(files[0]):
                 print("[wa] File chosen via macOS picker automation.")
                 return
-            print("[wa] macOS picker automation did not find a picker window. Falling back to DOM input.")
+            print(
+                "[wa] macOS picker automation did not find a picker window. Falling back to DOM input."
+            )
         else:
             # Click the menu row to match the UI (best-effort).
             try:
@@ -307,14 +313,20 @@ class WhatsAppSender:
         print(f"[wa] file inputs found: {best.get('count')}")
         for entry in top:
             try:
-                print(f"[wa] input-candidate idx={entry.get('i')} score={entry.get('score')} accept={entry.get('accept')}")
+                print(
+                    f"[wa] input-candidate idx={entry.get('i')} score={entry.get('score')} accept={entry.get('accept')}"
+                )
             except Exception:
                 pass
 
-        print(f"[wa] Chosen file input idx={idx} accept={best.get('best', {}).get('accept','')}")
+        print(
+            f"[wa] Chosen file input idx={idx} accept={best.get('best', {}).get('accept','')}"
+        )
 
         file_input = self._page.locator('input[type="file"]').nth(idx)
-        file_input.set_input_files([str(p) for p in files] if want_multiple else str(files[0]))
+        file_input.set_input_files(
+            [str(p) for p in files] if want_multiple else str(files[0])
+        )
         print("[wa] Files set on photos/videos input.")
 
     def _try_choose_file_in_macos_dialog(self, file_path: Path) -> bool:
@@ -450,9 +462,14 @@ end run
         phone = re.sub(r"\D+", "", phone or "")
         if phone:
             # Deep link opens the chat directly; avoids search box flakiness.
-            self._page.goto(f"https://web.whatsapp.com/send?phone={phone}", wait_until="domcontentloaded")
+            self._page.goto(
+                f"https://web.whatsapp.com/send?phone={phone}",
+                wait_until="domcontentloaded",
+            )
             # Wait until message composer exists (footer text box)
-            self._page.wait_for_selector('footer div[role="textbox"][contenteditable="true"]', timeout=30_000)
+            self._page.wait_for_selector(
+                'footer div[role="textbox"][contenteditable="true"]', timeout=30_000
+            )
             return
 
         self._open_chat(contact_name)
@@ -460,7 +477,9 @@ end run
     def send_text(self, contact_name: str, text: str, *, phone: str = "") -> None:
         assert self._page is not None
         self.open_chat(contact_name=contact_name, phone=phone)
-        composer = self._page.locator('footer div[role="textbox"][contenteditable="true"]').first
+        composer = self._page.locator(
+            'footer div[role="textbox"][contenteditable="true"]'
+        ).first
         composer.wait_for(state="visible", timeout=30_000)
         composer.click()
         composer.type(text, delay=2)
@@ -488,7 +507,9 @@ end run
             # If Enter opened the chat directly, we can continue.
             pass
 
-    def send_media(self, contact_name: str, media_path: Path, *, phone: str = "", caption: str = "") -> None:
+    def send_media(
+        self, contact_name: str, media_path: Path, *, phone: str = "", caption: str = ""
+    ) -> None:
         assert self._page is not None
         print(f"[wa] Opening chat (phone={'yes' if phone else 'no'})...")
         self.open_chat(contact_name=contact_name, phone=phone)
@@ -501,7 +522,9 @@ end run
             try:
                 # Caption box lives in the media preview dialog; avoid grabbing the left search box.
                 dialog = self._page.locator('div[role="dialog"]').first
-                caption_box = dialog.locator('div[role="textbox"][contenteditable="true"]').last
+                caption_box = dialog.locator(
+                    'div[role="textbox"][contenteditable="true"]'
+                ).last
                 caption_box.wait_for(timeout=15_000)
                 caption_box.click()
                 caption_box.type(caption, delay=5)
@@ -526,7 +549,14 @@ end run
         time.sleep(8)
         print("[wa] Done.")
 
-    def send_media_batch(self, contact_name: str, media_paths: list[Path], *, phone: str = "", caption: str = "") -> None:
+    def send_media_batch(
+        self,
+        contact_name: str,
+        media_paths: list[Path],
+        *,
+        phone: str = "",
+        caption: str = "",
+    ) -> None:
         """
         Best-effort "one go" sending:
         - If WhatsApp's file input supports multi-select, uploads all at once.
@@ -545,14 +575,18 @@ end run
 
         # Try multi-select via '+' -> 'Photos & Videos' and detect a multiple input.
         try:
-            multi_input = self._page.locator('input[type="file"][multiple][accept*="image"], input[type="file"][multiple][accept*="video"]').first
+            multi_input = self._page.locator(
+                'input[type="file"][multiple][accept*="image"], input[type="file"][multiple][accept*="video"]'
+            ).first
             if multi_input.count() > 0:
                 print("[wa] Multi-select input found. Uploading all at once...")
                 self._upload_via_plus_photos_videos(media_paths)
                 if caption:
                     try:
                         dialog = self._page.locator('div[role="dialog"]').first
-                        caption_box = dialog.locator('div[role="textbox"][contenteditable="true"]').last
+                        caption_box = dialog.locator(
+                            'div[role="textbox"][contenteditable="true"]'
+                        ).last
                         caption_box.wait_for(timeout=15_000)
                         caption_box.click()
                         caption_box.type(caption, delay=5)
@@ -594,9 +628,15 @@ end run
                 self._send_in_open_chat(p, caption=caption if idx == 1 else "")
             except Exception as e:  # noqa: BLE001
                 msg = str(e)
-                if "TargetClosedError" in msg or "Target page" in msg or "has been closed" in msg:
+                if (
+                    "TargetClosedError" in msg
+                    or "Target page" in msg
+                    or "has been closed" in msg
+                ):
                     # Best-effort recovery: restart WhatsApp context once and retry this file.
-                    print("[wa] Page closed unexpectedly. Restarting WhatsApp Web and retrying this file...")
+                    print(
+                        "[wa] Page closed unexpectedly. Restarting WhatsApp Web and retrying this file..."
+                    )
                     try:
                         self.stop()
                     except Exception:
@@ -605,7 +645,9 @@ end run
                     self.open_chat(contact_name=contact_name, phone=phone)
                     self._send_in_open_chat(p, caption=caption if idx == 1 else "")
                 else:
-                    raise RuntimeError(f"Failed while sending {p.name} ({idx}/{len(media_paths)}): {e}") from e
+                    raise RuntimeError(
+                        f"Failed while sending {p.name} ({idx}/{len(media_paths)}): {e}"
+                    ) from e
             time.sleep(2)
             print(f"[wa] Sent {idx}/{len(media_paths)}")
         print("[wa] Sequential batch done.")
@@ -620,7 +662,9 @@ end run
         if caption:
             try:
                 dialog = self._page.locator('div[role="dialog"]').first
-                caption_box = dialog.locator('div[role="textbox"][contenteditable="true"]').last
+                caption_box = dialog.locator(
+                    'div[role="textbox"][contenteditable="true"]'
+                ).last
                 caption_box.wait_for(timeout=15_000)
                 caption_box.click()
                 caption_box.type(caption, delay=5)
@@ -635,4 +679,3 @@ end run
             self._page.keyboard.press("Enter")
             time.sleep(1)
         time.sleep(6)
-

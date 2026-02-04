@@ -4,7 +4,6 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Optional
 
-
 SETTINGS_PATH = Path("settings.json")
 
 
@@ -83,7 +82,9 @@ def _validate_time_hhmm(v: str) -> str:
     return "19:00"
 
 
-def load_settings(*, default_recipient_name: str = "", default_recipient_phone: str = "") -> AppSettings:
+def load_settings(
+    *, default_recipient_name: str = "", default_recipient_phone: str = ""
+) -> AppSettings:
     """
     Loads settings.json if present; otherwise returns a default settings object.
     If there are no recipients configured yet, we create one from the env-based defaults.
@@ -102,7 +103,9 @@ def load_settings(*, default_recipient_name: str = "", default_recipient_phone: 
     schedule = ScheduleSettings(
         enabled=_coerce_bool(sched_raw.get("enabled"), True),
         tz=_coerce_str(sched_raw.get("tz") or "Europe/Berlin", "Europe/Berlin"),
-        time_hhmm=_validate_time_hhmm(_coerce_str(sched_raw.get("time_hhmm") or "19:00", "19:00")),
+        time_hhmm=_validate_time_hhmm(
+            _coerce_str(sched_raw.get("time_hhmm") or "19:00", "19:00")
+        ),
     )
 
     recipients: list[RecipientSettings] = []
@@ -117,13 +120,19 @@ def load_settings(*, default_recipient_name: str = "", default_recipient_phone: 
             recipients.append(
                 RecipientSettings(
                     id=rid,
-                    display_name=_coerce_str(r.get("display_name") or r.get("wa_contact_name") or rid, rid).strip(),
-                    wa_contact_name=_coerce_str(r.get("wa_contact_name") or "", "").strip(),
+                    display_name=_coerce_str(
+                        r.get("display_name") or r.get("wa_contact_name") or rid, rid
+                    ).strip(),
+                    wa_contact_name=_coerce_str(
+                        r.get("wa_contact_name") or "", ""
+                    ).strip(),
                     wa_phone=_normalize_phone(_coerce_str(r.get("wa_phone") or "", "")),
                     enabled=_coerce_bool(r.get("enabled"), True),
                     send_posts=_coerce_bool(r.get("send_posts"), True),
                     send_stories=_coerce_bool(r.get("send_stories"), True),
-                    send_close_friends_stories=_coerce_bool(r.get("send_close_friends_stories"), False),
+                    send_close_friends_stories=_coerce_bool(
+                        r.get("send_close_friends_stories"), False
+                    ),
                 )
             )
 
@@ -144,7 +153,11 @@ def load_settings(*, default_recipient_name: str = "", default_recipient_phone: 
 
     st = AppSettings(
         version=int(raw.get("version") or 1) if isinstance(raw, dict) else 1,
-        updated_ts=float(raw.get("updated_ts") or _now_ts()) if isinstance(raw, dict) else _now_ts(),
+        updated_ts=(
+            float(raw.get("updated_ts") or _now_ts())
+            if isinstance(raw, dict)
+            else _now_ts()
+        ),
         schedule=schedule,
         recipients=recipients,
     )
@@ -154,7 +167,9 @@ def load_settings(*, default_recipient_name: str = "", default_recipient_phone: 
 def save_settings(settings: AppSettings) -> None:
     settings.updated_ts = _now_ts()
     payload = asdict(settings)
-    SETTINGS_PATH.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    SETTINGS_PATH.write_text(
+        json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
 
 
 def settings_to_public_dict(settings: AppSettings) -> dict:
@@ -178,7 +193,9 @@ def settings_from_public_dict(data: dict) -> AppSettings:
     schedule = ScheduleSettings(
         enabled=_coerce_bool(sched.get("enabled"), True),
         tz=_coerce_str(sched.get("tz") or "Europe/Berlin", "Europe/Berlin"),
-        time_hhmm=_validate_time_hhmm(_coerce_str(sched.get("time_hhmm") or "19:00", "19:00")),
+        time_hhmm=_validate_time_hhmm(
+            _coerce_str(sched.get("time_hhmm") or "19:00", "19:00")
+        ),
     )
 
     recipients_in = data.get("recipients", [])
@@ -194,7 +211,9 @@ def settings_from_public_dict(data: dict) -> AppSettings:
         if not rid or rid in seen_ids:
             continue
         seen_ids.add(rid)
-        display_name = _coerce_str(r.get("display_name") or r.get("wa_contact_name") or rid, rid).strip()
+        display_name = _coerce_str(
+            r.get("display_name") or r.get("wa_contact_name") or rid, rid
+        ).strip()
         wa_contact_name = _coerce_str(r.get("wa_contact_name") or "", "").strip()
         wa_phone = _normalize_phone(_coerce_str(r.get("wa_phone") or "", ""))
         recipients.append(
@@ -206,9 +225,10 @@ def settings_from_public_dict(data: dict) -> AppSettings:
                 enabled=_coerce_bool(r.get("enabled"), True),
                 send_posts=_coerce_bool(r.get("send_posts"), True),
                 send_stories=_coerce_bool(r.get("send_stories"), True),
-                send_close_friends_stories=_coerce_bool(r.get("send_close_friends_stories"), False),
+                send_close_friends_stories=_coerce_bool(
+                    r.get("send_close_friends_stories"), False
+                ),
             )
         )
 
     return AppSettings(version=1, schedule=schedule, recipients=recipients)
-

@@ -8,7 +8,6 @@ from typing import Literal, Optional
 from src.ig import IgClient
 from src.main import load_config
 
-
 CACHE_PATH = Path("user_cache.json")
 FOLLOW_CACHE_PATH = Path("follow_cache.json")
 WARM_STATE_PATH = Path("warm_state.json")
@@ -43,7 +42,10 @@ def _load_cache() -> dict:
 
 
 def _save_cache(cache: dict) -> None:
-    CACHE_PATH.write_text(json.dumps(cache, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    CACHE_PATH.write_text(
+        json.dumps(cache, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
+
 
 def _load_follow_cache() -> dict:
     if not FOLLOW_CACHE_PATH.exists():
@@ -56,7 +58,10 @@ def _load_follow_cache() -> dict:
 
 
 def _save_follow_cache(cache: dict) -> None:
-    FOLLOW_CACHE_PATH.write_text(json.dumps(cache, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    FOLLOW_CACHE_PATH.write_text(
+        json.dumps(cache, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
+
 
 def _load_warm_state() -> dict:
     if not WARM_STATE_PATH.exists():
@@ -69,7 +74,9 @@ def _load_warm_state() -> dict:
 
 
 def _save_warm_state(state: dict) -> None:
-    WARM_STATE_PATH.write_text(json.dumps(state, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    WARM_STATE_PATH.write_text(
+        json.dumps(state, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
 
 
 def reset_warm_cache_state() -> None:
@@ -207,7 +214,9 @@ def get_user_stats_by_username(
     return stats
 
 
-def get_not_following_back_usernames(*, follow_cache_ttl_s: int = 6 * 60 * 60, force_refresh: bool = False) -> list[str]:
+def get_not_following_back_usernames(
+    *, follow_cache_ttl_s: int = 6 * 60 * 60, force_refresh: bool = False
+) -> list[str]:
     """
     Returns usernames you follow that don't follow you back.
     Uses a local cache for followers/following lists to stay fast.
@@ -227,7 +236,9 @@ def get_not_following_back_usernames(*, follow_cache_ttl_s: int = 6 * 60 * 60, f
         try:
             following_raw = fc.get("following_map") or {}
             if isinstance(following_raw, dict):
-                following_map = {int(k): str(v) for k, v in following_raw.items() if str(k).isdigit()}
+                following_map = {
+                    int(k): str(v) for k, v in following_raw.items() if str(k).isdigit()
+                }
         except Exception:
             following_map = {}
 
@@ -276,7 +287,13 @@ def warm_user_cache_step(
     total = len(usernames)
     if total == 0:
         reset_warm_cache_state()
-        return {"total": 0, "processed": 0, "percent": 100.0, "done": True, "newly_fetched": 0}
+        return {
+            "total": 0,
+            "processed": 0,
+            "percent": 100.0,
+            "done": True,
+            "newly_fetched": 0,
+        }
 
     # Resume from previous state if it matches the same list size.
     state = _load_warm_state()
@@ -290,7 +307,11 @@ def warm_user_cache_step(
 
     # If we were rate-limited recently, pause.
     try:
-        blocked_until_ts = float(state.get("blocked_until_ts") or 0.0) if isinstance(state, dict) else 0.0
+        blocked_until_ts = (
+            float(state.get("blocked_until_ts") or 0.0)
+            if isinstance(state, dict)
+            else 0.0
+        )
     except Exception:
         blocked_until_ts = 0.0
     if blocked_until_ts and now < blocked_until_ts:
@@ -374,6 +395,7 @@ def warm_user_cache_step(
         "done": done,
         "newly_fetched": newly_fetched,
     }
+
 
 def not_following_back_detailed(
     *,
@@ -473,4 +495,3 @@ def not_following_back_detailed(
         out.sort(key=keyf, reverse=reverse)
 
     return out
-
