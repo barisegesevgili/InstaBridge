@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from zoneinfo import ZoneInfo
 
 from flask import Flask, jsonify, render_template, request
@@ -546,36 +546,93 @@ def api_save_settings():
 @app.get("/api/scheduler/next-run")
 def api_scheduler_next_run():
     """
-    Computes next run time based on settings.json.
+    Computes next run time for each recipient based on settings.json.
+    Returns per-recipient schedules.
     """
     try:
+        from src.scheduler import next_daily_run
+
         cfg = load_config()
         st = load_settings(
             default_recipient_name=cfg.wa_content_contact_name,
             default_recipient_phone=cfg.wa_content_phone,
         )
-        enabled = bool(st.schedule.enabled)
-        tz_name = (st.schedule.tz or "Europe/Berlin").strip() or "Europe/Berlin"
-        try:
-            tz = ZoneInfo(tz_name)
-        except Exception:
-            tz = ZoneInfo("Europe/Berlin")
-            tz_name = "Europe/Berlin"
 
-        if not enabled:
-            return jsonify({"enabled": False, "next_run": None, "tz": tz_name})
+        # Get enabled recipients
+        enabled_recipients = [
+            r
+            for r in (st.recipients or [])
+            if r.enabled and (r.wa_contact_name or r.wa_phone)
+        ]
 
-        hhmm = (st.schedule.time_hhmm or "19:00").strip() or "19:00"
-        try:
-            hh_s, mm_s = hhmm.split(":")
-            hh, mm = int(hh_s), int(mm_s)
-        except Exception:
-            hh, mm = 19, 0
-        now = datetime.now(tz)
-        nxt = now.replace(hour=hh, minute=mm, second=0, microsecond=0)
-        if nxt <= now:
-            nxt = nxt + timedelta(days=1)
-        return jsonify({"enabled": True, "next_run": nxt.isoformat(), "tz": tz_name})
+        def get_recipient_schedule(recipient, global_schedule):
+            """Get effective schedule for a recipient."""
+            enabled = (
+                recipient.schedule_enabled
+                if recipient.schedule_enabled is not None
+                else global_schedule.enabled
+            )
+            tz = (
+                recipient.schedule_tz
+                if recipient.schedule_tz
+                else (global_schedule.tz or "Europe/Berlin")
+            )
+            time_hhmm = (
+                recipient.schedule_time_hhmm
+                if recipient.schedule_time_hhmm
+                else (global_schedule.time_hhmm or "19:00")
+            )
+            return enabled, tz, time_hhmm
+
+        recipient_schedules = []
+        for recipient in enabled_recipients:
+            enabled, tz_name, time_hhmm = get_recipient_schedule(recipient, st.schedule)
+            try:
+                tz = ZoneInfo(tz_name)
+            except Exception:
+                tz = ZoneInfo("Europe/Berlin")
+                tz_name = "Europe/Berlin"
+
+            if enabled:
+                now = datetime.now(tz)
+                nxt = next_daily_run(now, hhmm=time_hhmm)
+                recipient_schedules.append(
+                    {
+                        "recipient_id": recipient.id,
+                        "recipient_name": recipient.display_name,
+                        "enabled": True,
+                        "next_run": nxt.isoformat(),
+                        "tz": tz_name,
+                        "time": time_hhmm,
+                    }
+                )
+            else:
+                recipient_schedules.append(
+                    {
+                        "recipient_id": recipient.id,
+                        "recipient_name": recipient.display_name,
+                        "enabled": False,
+                        "next_run": None,
+                        "tz": tz_name,
+                        "time": time_hhmm,
+                    }
+                )
+
+        # Sort by next_run time
+        recipient_schedules.sort(
+            key=lambda x: (x["next_run"] or "9999-12-31", x["recipient_name"])
+        )
+
+        return jsonify(
+            {
+                "global_schedule": {
+                    "enabled": st.schedule.enabled,
+                    "tz": st.schedule.tz or "Europe/Berlin",
+                    "time_hhmm": st.schedule.time_hhmm or "19:00",
+                },
+                "recipients": recipient_schedules,
+            }
+        )
     except Exception as e:  # noqa: BLE001
         return jsonify({"error": str(e)}), 500
 

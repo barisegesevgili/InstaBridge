@@ -174,7 +174,11 @@ def resend_last(*, cfg: Config, max_files: int = 0) -> None:
 
 
 def run_once(
-    *, cfg: Config, force_resend_current: bool = False, dry_run: bool = False
+    *,
+    cfg: Config,
+    force_resend_current: bool = False,
+    dry_run: bool = False,
+    recipient_id: str | None = None,
 ) -> None:
     media_dir = Path("media")
     media_dir.mkdir(exist_ok=True)
@@ -202,11 +206,21 @@ def run_once(
     else:
         print("📵 Dry run: Skipping WhatsApp Web connection")
 
-    recipients = [
+    # Filter recipients: if recipient_id specified, only that one; otherwise all enabled
+    all_recipients = [
         r
         for r in (settings.recipients or [])
         if r.enabled and (r.wa_contact_name or r.wa_phone)
     ]
+    if recipient_id:
+        recipients = [r for r in all_recipients if r.id == recipient_id]
+        if not recipients:
+            if wa:
+                wa.stop()
+            print(f"Done: recipient '{recipient_id}' not found or not enabled.")
+            return
+    else:
+        recipients = all_recipients
     if not recipients:
         if wa:
             wa.stop()

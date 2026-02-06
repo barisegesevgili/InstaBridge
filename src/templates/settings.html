@@ -70,6 +70,7 @@
             <th>Share posts</th>
             <th>Share stories</th>
             <th>Close friends stories</th>
+            <th>Schedule</th>
             <th></th>
           </tr>
         </thead>
@@ -97,6 +98,11 @@
         for (const r of (settings.recipients || [])) {
           const tr = document.createElement('tr');
           tr.dataset.id = r.id;
+          // Schedule fields (null = use global)
+          const schedEnabled = r.schedule_enabled !== null ? r.schedule_enabled : (settings.schedule && settings.schedule.enabled);
+          const schedTz = r.schedule_tz || (settings.schedule && settings.schedule.tz) || 'Europe/Berlin';
+          const schedTime = r.schedule_time_hhmm || (settings.schedule && settings.schedule.time_hhmm) || '19:00';
+          const useGlobal = r.schedule_enabled === null && !r.schedule_tz && !r.schedule_time_hhmm;
           tr.innerHTML = `
             <td><input type="checkbox" class="r_enabled" ${r.enabled ? 'checked' : ''} /></td>
             <td><input type="text" class="r_display_name" value="${(r.display_name||'').replaceAll('"','&quot;')}" /></td>
@@ -105,9 +111,32 @@
             <td><input type="checkbox" class="r_send_posts" ${r.send_posts ? 'checked' : ''} /></td>
             <td><input type="checkbox" class="r_send_stories" ${r.send_stories ? 'checked' : ''} /></td>
             <td><input type="checkbox" class="r_send_close" ${r.send_close_friends_stories ? 'checked' : ''} /></td>
+            <td>
+              <div style="display: flex; flex-direction: column; gap: 4px; min-width: 200px;">
+                <label class="chk" style="font-size: 11px;">
+                  <input type="checkbox" class="r_use_global_schedule" ${useGlobal ? 'checked' : ''} />
+                  Use global schedule
+                </label>
+                <div class="r_schedule_override" style="display: ${useGlobal ? 'none' : 'flex'}; flex-direction: column; gap: 4px;">
+                  <label style="font-size: 11px;">
+                    <input type="checkbox" class="r_schedule_enabled" ${schedEnabled ? 'checked' : ''} />
+                    Schedule enabled
+                  </label>
+                  <input type="text" class="r_schedule_tz" value="${schedTz}" placeholder="Europe/Berlin" style="font-size: 11px; padding: 4px;" />
+                  <input type="time" class="r_schedule_time" value="${schedTime}" style="font-size: 11px; padding: 4px;" />
+                </div>
+              </div>
+            </td>
             <td><button class="secondary" onclick="removeRecipient('${r.id}')">Remove</button></td>
           `;
           tbody.appendChild(tr);
+          
+          // Add event listener for "use global schedule" toggle
+          const useGlobalCheckbox = tr.querySelector('.r_use_global_schedule');
+          const scheduleOverride = tr.querySelector('.r_schedule_override');
+          useGlobalCheckbox.addEventListener('change', function() {
+            scheduleOverride.style.display = this.checked ? 'none' : 'flex';
+          });
         }
       }
 
@@ -121,7 +150,10 @@
           enabled: true,
           send_posts: true,
           send_stories: true,
-          send_close_friends_stories: false
+          send_close_friends_stories: false,
+          schedule_enabled: null,
+          schedule_tz: null,
+          schedule_time_hhmm: null
         });
         render();
       }
@@ -141,7 +173,8 @@
         const out = [];
         for (const tr of rows) {
           const id = tr.dataset.id;
-          out.push({
+          const useGlobal = tr.querySelector('.r_use_global_schedule').checked;
+          const recipient = {
             id,
             display_name: tr.querySelector('.r_display_name').value,
             wa_contact_name: tr.querySelector('.r_wa_contact_name').value,
@@ -150,7 +183,20 @@
             send_posts: tr.querySelector('.r_send_posts').checked,
             send_stories: tr.querySelector('.r_send_stories').checked,
             send_close_friends_stories: tr.querySelector('.r_send_close').checked
-          });
+          };
+          
+          // Schedule fields: null if using global, otherwise use values
+          if (useGlobal) {
+            recipient.schedule_enabled = null;
+            recipient.schedule_tz = null;
+            recipient.schedule_time_hhmm = null;
+          } else {
+            recipient.schedule_enabled = tr.querySelector('.r_schedule_enabled').checked;
+            recipient.schedule_tz = tr.querySelector('.r_schedule_tz').value || null;
+            recipient.schedule_time_hhmm = tr.querySelector('.r_schedule_time').value || null;
+          }
+          
+          out.push(recipient);
         }
         settings.recipients = out;
       }
@@ -161,7 +207,16 @@
           const res = await fetch('/api/scheduler/next-run');
           const data = await res.json();
           if (!res.ok) throw new Error(data.error || 'failed');
-          el.textContent = data.enabled ? (`Next run: ${data.next_run}`) : 'Scheduler disabled';
+          
+          if (data.recipients && data.recipients.length > 0) {
+            const nextRuns = data.recipients
+              .filter(r => r.enabled && r.next_run)
+              .map(r => `${r.recipient_name}: ${new Date(r.next_run).toLocaleString()}`)
+              .join(' | ');
+            el.textContent = nextRuns || 'No scheduled runs';
+          } else {
+            el.textContent = 'No recipients configured';
+          }
         } catch (e) {
           el.textContent = '';
         }

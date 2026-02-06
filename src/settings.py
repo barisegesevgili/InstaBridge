@@ -14,7 +14,7 @@ def _now_ts() -> float:
 @dataclass
 class RecipientSettings:
     """
-    WhatsApp recipient + content preferences.
+    WhatsApp recipient + content preferences + per-recipient schedule.
     """
 
     id: str
@@ -27,6 +27,11 @@ class RecipientSettings:
     send_posts: bool = True
     send_stories: bool = True
     send_close_friends_stories: bool = False
+
+    # Per-recipient schedule (if None, uses global schedule)
+    schedule_enabled: bool | None = None  # None = use global, True/False = override
+    schedule_tz: str | None = None  # None = use global
+    schedule_time_hhmm: str | None = None  # None = use global
 
 
 @dataclass
@@ -117,6 +122,20 @@ def load_settings(
             rid = _coerce_str(r.get("id") or "").strip()
             if not rid:
                 continue
+            # Parse schedule fields (None if not set, to use global)
+            sched_enabled = r.get("schedule_enabled")
+            sched_enabled = (
+                None if sched_enabled is None else _coerce_bool(sched_enabled, True)
+            )
+            sched_tz = r.get("schedule_tz")
+            sched_tz = None if sched_tz is None else _coerce_str(sched_tz, "")
+            sched_time = r.get("schedule_time_hhmm")
+            sched_time = (
+                None
+                if sched_time is None
+                else _validate_time_hhmm(_coerce_str(sched_time, "19:00"))
+            )
+
             recipients.append(
                 RecipientSettings(
                     id=rid,
@@ -133,6 +152,9 @@ def load_settings(
                     send_close_friends_stories=_coerce_bool(
                         r.get("send_close_friends_stories"), False
                     ),
+                    schedule_enabled=sched_enabled,
+                    schedule_tz=sched_tz,
+                    schedule_time_hhmm=sched_time,
                 )
             )
 
@@ -216,6 +238,20 @@ def settings_from_public_dict(data: dict) -> AppSettings:
         ).strip()
         wa_contact_name = _coerce_str(r.get("wa_contact_name") or "", "").strip()
         wa_phone = _normalize_phone(_coerce_str(r.get("wa_phone") or "", ""))
+        # Parse schedule fields
+        sched_enabled = r.get("schedule_enabled")
+        sched_enabled = (
+            None if sched_enabled is None else _coerce_bool(sched_enabled, True)
+        )
+        sched_tz = r.get("schedule_tz")
+        sched_tz = None if sched_tz is None else _coerce_str(sched_tz, "")
+        sched_time = r.get("schedule_time_hhmm")
+        sched_time = (
+            None
+            if sched_time is None
+            else _validate_time_hhmm(_coerce_str(sched_time, "19:00"))
+        )
+
         recipients.append(
             RecipientSettings(
                 id=rid,
@@ -228,6 +264,9 @@ def settings_from_public_dict(data: dict) -> AppSettings:
                 send_close_friends_stories=_coerce_bool(
                     r.get("send_close_friends_stories"), False
                 ),
+                schedule_enabled=sched_enabled,
+                schedule_tz=sched_tz,
+                schedule_time_hhmm=sched_time,
             )
         )
 
